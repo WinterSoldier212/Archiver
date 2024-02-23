@@ -1,7 +1,10 @@
 #pragma once
+
 #include <iostream>
 #include <vector>
 #include <boost/program_options.hpp>
+#include "Archive.h"
+
 
 namespace po = boost::program_options;
 
@@ -22,16 +25,21 @@ void zip(const po::variables_map& vm)
     if (vm.count("dir"))
         outputFileDirectory = vm["dir"].as<std::string>();
 
-    for (const auto& file : files)
-        std::cout << file << std::endl;
-
-    std::cout << outputFileDirectory << std::endl;
-    std::cout << outputFileName << std::endl;
+    Archive archive(outputFileDirectory + outputFileName);
+    for (const auto& file : files) {
+        archive.addFile(file);
+    }
 }
 
 void unzip(const po::variables_map& vm)
 {
-    std::string outputFileDirectory;
+    std::vector<std::string> archives;
+    std::string outputFileDirectory = ".\\";
+
+    if (vm.count("file"))
+        archives = vm["file"].as<std::vector <std::string> >();
+    else
+        throw std::exception("You must specify at least one file to be archived!");
 
     if (vm.count("dir"))
         outputFileDirectory = vm["dir"].as<std::string>();

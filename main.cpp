@@ -5,8 +5,13 @@
 
 namespace po = boost::program_options;
 
-int main(int argc, char* argv[])
+
+
+int main()
 {
+    int argc = 4;
+    const char* argv[] = { "Archiver.exe", "--zip", "-f fasdf\\asdfa.txt", "-f asdfasdf\\dfasdfasd.txt"};
+
     po::options_description desc("Required options");
     desc.add_options()
         ("zip,z", "Main flag-option for zipping file(s).")

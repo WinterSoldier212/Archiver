@@ -3,43 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <map>
-
-std::vector<int>getWeightsSymbolsFromFile(const std::string& pathForFile)
-{
-	std::ifstream rfile(pathForFile, std::ios::in);
-	std::vector<int> weight(0x100);
-
-	char ch;
-	while (!rfile.eof())
-	{
-		rfile >> ch;
-		++weight[unsigned char(ch)];
-	}
-	rfile.close();
-
-	return weight;
-}
-
-std::string getEncodedCharacterWeights(std::vector<int> weight)
-{
-	std::string encodedCharWeights = "";
-
-	for (int i = 0; i < 0x100; ++i)
-	{
-		if (weight[i] == 0)
-			continue;
-
-		encodedCharWeights += '<';
-		for (int j = 7; j >= 0; --j)
-			if (weight[i] > pow(256, j))
-				encodedCharWeights += weight[i] / pow(256, j);
-
-		encodedCharWeights += char(i);
-		encodedCharWeights += '>';
-	}
-
-	return encodedCharWeights;
-}
+#include <stack>
+#include "HuffmanTree.h"
 
 std::string getBinaryText(std::map<char, std::string>& haffmanCode, const std::string& pathForFile)
 {
@@ -57,8 +22,10 @@ std::string getBinaryText(std::map<char, std::string>& haffmanCode, const std::s
 	return encodeText;
 }
 
-std::string getEncodedText(std::map<char, std::string>& haffmanCode, const std::string& pathForFile)
-{
+std::string getFileTextInHuffmanCode(
+	const std::string& pathForFile, 
+	std::map<char, std::string>& haffmanCode
+) {
 	char ch = 0;
 	int counter = 0;
 
@@ -91,3 +58,64 @@ std::string getEncodedText(std::map<char, std::string>& haffmanCode, const std::
 
 	return countZero + str;
 }
+
+//string str = (tree->value == '\0' ? "" : "0");
+//
+//map<char, string> huffmanCode;
+//createHuffmanCode(tree, huffmanCode, str);
+
+void createHuffmanCode(Node* tree, map<char, string>& huffmanCode, string str) {
+	if (tree == nullptr)
+		return;
+
+	if (!tree->left && !tree->right) {
+		huffmanCode[tree->value] = str;
+	}
+
+	createHuffmanCode(tree->left, huffmanCode, str + "0");
+	createHuffmanCode(tree->right, huffmanCode, str + "1");
+
+	delete tree;
+}
+
+map<char, string> getHuffmanCode(Node* root)
+{
+	map<char, string> huffmanCode;
+	string str = "";
+	stack<Node*> parants;
+
+	bool go = true;
+	while (go == true)
+	{
+		while (root->left != nullptr)
+		{
+			parants.push(root);
+			root = root->left;
+		}
+
+		huffmanCode[root->value] = str;
+		root = parants.top(); parants.pop();
+		delete root->left;
+
+		while (!root->right)
+		{
+
+		}
+	}
+
+	return huffmanCode;
+}
+
+map<string, char> getReverseHuffmanCode(map<char, string> HuffmanCode)
+{
+	map<string, char> reverseMap;
+
+	for (auto& i : HuffmanCode)
+	{
+		reverseMap.insert(make_pair(i.second, i.first));
+	}
+
+	return reverseMap;
+}
+
+// getHuffmanTreeInText
