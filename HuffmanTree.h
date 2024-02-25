@@ -28,12 +28,24 @@ public:
 		vector<int> weight = getWeightsSymbolsFromFile(pathForFile);
 		multimap<int, Node*> tree;
 
+		char symbol, null_symbol = 0;
+		int weightSymbol;
+
+		for (int i = 0; i < 0x100; ++i)
+		{
+			if (weight.at(i) == 0)
+			{
+				null_symbol = i;
+				break;
+			}
+		}
+
 		for (int i = 0; i < 0x100; ++i)
 		{
 			if (weight.at(i) != 0)
 			{
-				char symbol = char(i);
-				int weightSymbol = weight.at(i);
+				symbol = char(i);
+				weightSymbol = weight.at(i);
 				Node* node = new Node(symbol);
 
 				auto element = make_pair(weightSymbol, node);
@@ -43,7 +55,7 @@ public:
 
 		while (tree.size() > 1)
 		{
-			tree.insert(getNewTreeElement(tree));
+			tree.insert(getNewTreeElement(tree, null_symbol));
 		}
 
 		return tree.begin()->second;
@@ -52,7 +64,7 @@ public:
 private:
 	std::vector<int>getWeightsSymbolsFromFile(const std::string& pathForFile)
 	{
-		std::ifstream rfile(pathForFile, std::ios::in);
+		std::ifstream rfile(pathForFile);
 		std::vector<int> weight(0x100);
 
 		char ch;
@@ -66,13 +78,13 @@ private:
 		return weight;
 	}
 
-	pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree)
+	pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree, char null_symbol)
 	{
 		int weight_ = 0;
+
 		Node* left = getAndDeleteElement(weight_, tree);
 		Node* right = getAndDeleteElement(weight_, tree);
-
-		Node* node_ = new Node('\0', left, right);
+		Node* node_ = new Node(null_symbol, left, right);
 
 		return make_pair(weight_, node_);
 	}

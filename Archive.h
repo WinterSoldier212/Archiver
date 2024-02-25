@@ -4,6 +4,7 @@
 #include "HuffmanTree.h"
 #include "HuffmanCode.h"
 #include "FileFunctions.h"
+#include <string>
 
 using namespace std;
 
@@ -12,13 +13,22 @@ class Archive
 public:
 	Archive(std::string pathForArchive)
 	{
-		if (fileIsExist(pathForArchive) == true)
+		string archiveName;
+		if (fileIsExist(pathForArchive + ".alzip"))
 		{
-			archive.open(pathForArchive, ios::app);
+			for (int i = 1; 1 < 100'000; ++i)
+			{
+				archiveName = pathForArchive + to_string(i) + ".alzip";
+				if (!fileIsExist(archiveName))
+				{
+					archive.open(archiveName, ios::out | ios::app);
+					break;
+				}
+			}
 		}
 		else
 		{
-			archive.open(pathForArchive, ios::in);
+			archive.open((pathForArchive + ".alzip"), ios::out | ios::app);
 		}
 	}
 
@@ -29,11 +39,15 @@ public:
 
 	void addFile(std::string pathForFile)
 	{
+		if (!fileIsExist(pathForFile)) {;
+			throw exception("File is not exist");
+		}
+
 		auto huffmanTree = HuffmanTree().getHuffmanTree(pathForFile);
 		auto huffmanCode = getHuffmanCode(huffmanTree);
 
 		std::string fileName = getFileNameFromPath(pathForFile);
-		std::string huffmanTreeInText = getHuffmanTreeInText(huffmanTree);
+		std::string huffmanTreeInText = getHuffmanTreeInText(huffmanTree, huffmanTree->value);
 		std::string fileTextInHuffmanCode = getFileTextInHuffmanCode(pathForFile, huffmanCode);
 
 		archive << "<N>" << fileName << "\n";
@@ -42,6 +56,6 @@ public:
 	}
 
 private:
-	fstream archive;
+	ofstream archive;
 };
 

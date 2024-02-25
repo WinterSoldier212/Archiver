@@ -1,12 +1,62 @@
 #pragma once
 
-#include <fstream>
-#include <vector>
 #include <map>
-#include <stack>
+#include <vector>
+#include <fstream>
 #include "HuffmanTree.h"
 
-std::string getBinaryText(std::map<char, std::string>& haffmanCode, const std::string& pathForFile)
+void createHuffmanCode(Node* root, string str, map<unsigned char, string>& huffmanCode)
+{
+	if (root == nullptr)
+		return;
+
+	if (!root->left && !root->right) {
+		huffmanCode[root->value] = str;
+	}
+
+	createHuffmanCode(root->left, str + "0", huffmanCode);
+	createHuffmanCode(root->right, str + "1", huffmanCode);
+}
+
+map<unsigned char, string> getHuffmanCode(Node* root)
+{
+	map<unsigned char, string> huffmanCode;
+	createHuffmanCode(root, "", huffmanCode);
+	return huffmanCode;
+}
+
+map<string, char> getReverseHuffmanCode(map<char, string> HuffmanCode)
+{
+	map<string, char> reverseMap;
+
+	for (auto& i : HuffmanCode)
+	{
+		reverseMap.insert(make_pair(i.second, i.first));
+	}
+
+	return reverseMap;
+}
+
+std::string getHuffmanTreeInText(Node* root, char ch)
+{
+	static std::string huffmanTreeInText = "";
+
+	if (root == nullptr)
+		return "";
+
+	if (root->value == ch)
+	{
+		huffmanTreeInText += root->left->value;
+		huffmanTreeInText += root->right->value;
+
+		getHuffmanTreeInText(root->left, ch);
+		getHuffmanTreeInText(root->right, ch);
+	}
+
+	return huffmanTreeInText;
+}
+
+std::string getBinaryText(std::map<unsigned char, std::string>& haffmanCode, const std::string& pathForFile)
 {
 	std::ifstream rfile(pathForFile, std::ios::in);
 	std::string encodeText = "";
@@ -23,11 +73,12 @@ std::string getBinaryText(std::map<char, std::string>& haffmanCode, const std::s
 }
 
 std::string getFileTextInHuffmanCode(
-	const std::string& pathForFile, 
-	std::map<char, std::string>& haffmanCode
+	const std::string& pathForFile,
+	std::map<unsigned char, std::string>& haffmanCode
 ) {
 	char ch = 0;
 	int counter = 0;
+	char countZero = '0';
 
 	std::string str = "";
 	std::string binaryFileText = getBinaryText(haffmanCode, pathForFile);
@@ -45,77 +96,8 @@ std::string getFileTextInHuffmanCode(
 		}
 	}
 
-	char countZero = '0';
-	while (counter != 0)
-	{
-		countZero++;
-		counter++;
-		str += '0';
-
-		if (counter == 8)
-			counter = 0;
-	}
+	countZero = 8 - counter + '0';
+	ch <<= 8 - counter;
 
 	return countZero + str;
 }
-
-//string str = (tree->value == '\0' ? "" : "0");
-//
-//map<char, string> huffmanCode;
-//createHuffmanCode(tree, huffmanCode, str);
-
-void createHuffmanCode(Node* tree, map<char, string>& huffmanCode, string str) {
-	if (tree == nullptr)
-		return;
-
-	if (!tree->left && !tree->right) {
-		huffmanCode[tree->value] = str;
-	}
-
-	createHuffmanCode(tree->left, huffmanCode, str + "0");
-	createHuffmanCode(tree->right, huffmanCode, str + "1");
-
-	delete tree;
-}
-
-map<char, string> getHuffmanCode(Node* root)
-{
-	map<char, string> huffmanCode;
-	string str = "";
-	stack<Node*> parants;
-
-	bool go = true;
-	while (go == true)
-	{
-		while (root->left != nullptr)
-		{
-			parants.push(root);
-			root = root->left;
-		}
-
-		huffmanCode[root->value] = str;
-		root = parants.top(); parants.pop();
-		delete root->left;
-
-		while (!root->right)
-		{
-
-		}
-	}
-
-	return huffmanCode;
-}
-
-map<string, char> getReverseHuffmanCode(map<char, string> HuffmanCode)
-{
-	map<string, char> reverseMap;
-
-	for (auto& i : HuffmanCode)
-	{
-		reverseMap.insert(make_pair(i.second, i.first));
-	}
-
-	return reverseMap;
-}
-
-// getHuffmanTreeInText

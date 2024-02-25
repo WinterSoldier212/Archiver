@@ -5,14 +5,13 @@
 #include <boost/program_options.hpp>
 #include "Archive.h"
 
-
 namespace po = boost::program_options;
 
 void zip(const po::variables_map& vm)
 {
     std::vector<std::string> files;
-    std::string outputFileDirectory = ".\\",
-        outputFileName = "Archiv.alzip";
+    std::string outputFileDirectory = "C:\\Users\\2020k\\source\\repos\\Archiver\\",
+        outputFileName = "Archiv";
 
     if (vm.count("file"))
         files = vm["file"].as<std::vector <std::string> >();
@@ -27,6 +26,7 @@ void zip(const po::variables_map& vm)
 
     Archive archive(outputFileDirectory + outputFileName);
     for (const auto& file : files) {
+        cout << file << endl;
         archive.addFile(file);
     }
 }
