@@ -3,9 +3,23 @@
 #include <iostream>
 #include <vector>
 #include <boost/program_options.hpp>
-#include "Archive.h"
+#include "Archiver.h"
 
 namespace po = boost::program_options;
+
+void addFileInArchive(Archiver& archive, const std::string& pathForFile)
+{
+    try
+    {
+        cout << "Trying to write a file - " << pathForFile << endl;
+        archive.addFile(pathForFile);
+        cout << "The file has been successfully archived!" << endl << endl;
+    }
+    catch (exception& ex)
+    {
+        cout << "Error! " << ex.what() << endl << endl;
+    }
+}
 
 void zip(const po::variables_map& vm)
 {
@@ -24,10 +38,9 @@ void zip(const po::variables_map& vm)
     if (vm.count("dir"))
         outputFileDirectory = vm["dir"].as<std::string>();
 
-    Archive archive(outputFileDirectory + outputFileName);
+    Archiver archive(outputFileDirectory + outputFileName);
     for (const auto& file : files) {
-        cout << file << endl;
-        archive.addFile(file);
+        addFileInArchive(archive, file);
     }
 }
 

@@ -7,8 +7,8 @@ namespace po = boost::program_options;
 
 int main()
 {
-    int argc = 4;
-    const char* argv[] = { "Archiver.exe", "--zip", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\main.cpp", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\Archive.h" };
+    int argc = 6;
+    const char* argv[] = { "Archiver.exe", "--zip", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\main.cpp", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\Archive.h", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\HuffmanCode.h", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\FileFunctions.h" };
 
     po::options_description desc("Required options");
     desc.add_options()

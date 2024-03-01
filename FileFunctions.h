@@ -24,4 +24,3 @@ std::string getFileNameFromPath(std::string path)
 	std::filesystem::path filePath(path);
 	return filePath.filename().string();
 }
-

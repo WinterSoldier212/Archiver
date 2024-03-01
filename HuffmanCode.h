@@ -37,22 +37,25 @@ map<string, char> getReverseHuffmanCode(map<char, string> HuffmanCode)
 	return reverseMap;
 }
 
-std::string getHuffmanTreeInText(Node* root, char ch)
+void translateHuffmanTreeIntoText(Node* root, char ch, std::string& huffmanTreeInText)
 {
-	static std::string huffmanTreeInText = "";
-
 	if (root == nullptr)
-		return "";
+		return;
 
 	if (root->value == ch)
 	{
 		huffmanTreeInText += root->left->value;
 		huffmanTreeInText += root->right->value;
 
-		getHuffmanTreeInText(root->left, ch);
-		getHuffmanTreeInText(root->right, ch);
+		translateHuffmanTreeIntoText(root->left, ch, huffmanTreeInText);
+		translateHuffmanTreeIntoText(root->right, ch, huffmanTreeInText);
 	}
+}
 
+std::string getHuffmanTreeIntoText(Node* root, char ch)
+{
+	std::string huffmanTreeInText = "";
+	translateHuffmanTreeIntoText(root, root->value, huffmanTreeInText);
 	return huffmanTreeInText;
 }
 

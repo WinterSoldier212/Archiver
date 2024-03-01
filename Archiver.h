@@ -8,10 +8,10 @@
 
 using namespace std;
 
-class Archive
+class Archiver
 {
 public:
-	Archive(std::string pathForArchive)
+	Archiver(std::string pathForArchive)
 	{
 		string archiveName;
 		if (fileIsExist(pathForArchive + ".alzip"))
@@ -32,7 +32,7 @@ public:
 		}
 	}
 
-	~Archive()
+	~Archiver()
 	{
 		archive.close();
 	}
@@ -40,15 +40,17 @@ public:
 	void addFile(std::string pathForFile)
 	{
 		if (!fileIsExist(pathForFile)) {;
-			throw exception("File is not exist");
+			throw exception("File is not exist!");
 		}
 
 		auto huffmanTree = HuffmanTree().getHuffmanTree(pathForFile);
 		auto huffmanCode = getHuffmanCode(huffmanTree);
 
 		std::string fileName = getFileNameFromPath(pathForFile);
-		std::string huffmanTreeInText = getHuffmanTreeInText(huffmanTree, huffmanTree->value);
+		std::string huffmanTreeInText = getHuffmanTreeIntoText(huffmanTree, huffmanTree->value);
 		std::string fileTextInHuffmanCode = getFileTextInHuffmanCode(pathForFile, huffmanCode);
+		
+		deleteTree(huffmanTree);
 
 		archive << "<N>" << fileName << "\n";
 		archive << "<T>" << huffmanTreeInText << "\n";
@@ -58,4 +60,3 @@ public:
 private:
 	ofstream archive;
 };
-

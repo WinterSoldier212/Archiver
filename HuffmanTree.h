@@ -98,3 +98,15 @@ private:
 		return element;
 	}
 };
+
+void deleteTree(Node* tree)
+{
+	if (tree == nullptr)
+		return;
+
+	if (!tree->left && !tree->right)
+		deleteTree(tree->left);
+		deleteTree(tree->right);
+
+	delete tree;
+}
