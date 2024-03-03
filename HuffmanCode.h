@@ -37,27 +37,7 @@ map<string, char> getReverseHuffmanCode(map<char, string> HuffmanCode)
 	return reverseMap;
 }
 
-void translateHuffmanTreeIntoText(Node* root, char ch, std::string& huffmanTreeInText)
-{
-	if (root == nullptr)
-		return;
 
-	if (root->value == ch)
-	{
-		huffmanTreeInText += root->left->value;
-		huffmanTreeInText += root->right->value;
-
-		translateHuffmanTreeIntoText(root->left, ch, huffmanTreeInText);
-		translateHuffmanTreeIntoText(root->right, ch, huffmanTreeInText);
-	}
-}
-
-std::string getHuffmanTreeIntoText(Node* root, char ch)
-{
-	std::string huffmanTreeInText = "";
-	translateHuffmanTreeIntoText(root, root->value, huffmanTreeInText);
-	return huffmanTreeInText;
-}
 
 std::string getBinaryText(std::map<unsigned char, std::string>& haffmanCode, const std::string& pathForFile)
 {
@@ -103,4 +83,78 @@ std::string getFileTextInHuffmanCode(
 	ch <<= 8 - counter;
 
 	return countZero + str;
+}
+
+
+
+Node* getTreeFromString(string str)
+{
+	char zeroSymbol = str[0];
+	vector<Node*> nodes;
+
+	for (int i = 0; i < str.size(); ++i)
+	{
+		Node* node = new Node{ str[i] };
+		nodes.push_back(node);
+	}
+
+	Node* cur = nodes[0];
+	auto it = nodes.begin(); it++;
+	vector<Node*> zeroNodes;
+
+	while (it != nodes.end())
+	{
+		Node* left = *it;
+		cur->left = left;
+		++it;
+
+		Node* right = *it;
+		cur->right = right;
+		++it;
+
+		if (left->value == zeroSymbol && right->value == zeroSymbol)
+		{
+			cur = left;
+			zeroNodes.push_back(right);
+		}
+		else if (left->value == zeroSymbol && right->value != zeroSymbol)
+		{
+			cur = left;
+		}
+		else if (left->value != zeroSymbol && right->value == zeroSymbol)
+		{
+			cur = right;
+		}
+		else if (left->value != zeroSymbol && right->value != zeroSymbol && !zeroNodes.empty())
+		{
+			int lastElement = zeroNodes.size() - 1;
+			cur = zeroNodes[lastElement];
+			zeroNodes.pop_back();
+		}
+	}
+
+	return nodes[0];
+}
+
+
+void translateHuffmanTreeIntoText(Node* root, char ch, std::string& huffmanTreeInText)
+{
+	if (root == nullptr)
+		return;
+
+	if (root->value == ch)
+	{
+		huffmanTreeInText += root->left->value;
+		huffmanTreeInText += root->right->value;
+
+		translateHuffmanTreeIntoText(root->left, ch, huffmanTreeInText);
+		translateHuffmanTreeIntoText(root->right, ch, huffmanTreeInText);
+	}
+}
+
+std::string getHuffmanTreeIntoText(Node* root, char ch)
+{
+	std::string huffmanTreeInText = "";
+	translateHuffmanTreeIntoText(root, root->value, huffmanTreeInText);
+	return huffmanTreeInText;
 }
