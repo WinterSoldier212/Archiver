@@ -3,14 +3,16 @@
 #include <fstream>
 #include <filesystem>
 
-bool fileIsEmpty(std::ifstream& pFile)
+using namespace std;
+
+bool fileIsEmpty(ifstream& pFile)
 {
-	return pFile.peek() == std::ifstream::traits_type::eof();
+	return pFile.peek() == ifstream::traits_type::eof();
 }
 
-bool fileIsExist(const std::string& pathForFile)
+bool fileIsExist(const string& pathForFile)
 {
-	std::ifstream file;
+	ifstream file;
 
 	file.open(pathForFile);
 	bool isExist = file.is_open();
@@ -19,8 +21,13 @@ bool fileIsExist(const std::string& pathForFile)
 	return isExist;
 }
 
-std::string getFileNameFromPath(std::string path)
+string getFileNameFromPath(string path)
 {
-	std::filesystem::path filePath(path);
+	filesystem::path filePath(path);
 	return filePath.filename().string();
+}
+
+string getCurrentDirectory()
+{
+	return filesystem::current_path().string() + "\\";
 }

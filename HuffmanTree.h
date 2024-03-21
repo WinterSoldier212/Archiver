@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <fstream>
 
 using namespace std;
 
@@ -23,17 +22,16 @@ struct Node
 class HuffmanTree
 {
 public:
-	Node* getHuffmanTree(std::string pathForFile)
+	Node* getHuffmanTree(vector<int> byteWeights)
 	{
-		vector<int> weight = getWeightsSymbolsFromFile(pathForFile);
-		multimap<int, Node*> tree;
+		multimap<int, Node*> tree_;
 
 		char symbol, null_symbol = 0;
-		int weightSymbol;
+		int byteWeight;
 
 		for (int i = 0; i < 0x100; ++i)
 		{
-			if (weight.at(i) == 0)
+			if (byteWeights.at(i) == 0)
 			{
 				null_symbol = i;
 				break;
@@ -42,42 +40,94 @@ public:
 
 		for (int i = 0; i < 0x100; ++i)
 		{
-			if (weight.at(i) != 0)
+			if (byteWeights.at(i) != 0)
 			{
 				symbol = char(i);
-				weightSymbol = weight.at(i);
+				byteWeight = byteWeights.at(i);
 				Node* node = new Node(symbol);
 
-				auto element = make_pair(weightSymbol, node);
-				tree.insert(element);
+				auto element = make_pair(byteWeight, node);
+				tree_.insert(element);
 			}
 		}
 
-		while (tree.size() > 1)
+		while (tree_.size() > 1)
 		{
-			tree.insert(getNewTreeElement(tree, null_symbol));
+			tree_.insert(getNewTreeElement(tree_, null_symbol));
 		}
 
-		return tree.begin()->second;
+		return tree_.begin()->second;
+	}
+
+	void deleteHuffmanTree(Node* tree)
+	{
+		if (tree == nullptr)
+			return;
+
+		if (!tree->left && !tree->right)
+			deleteHuffmanTree(tree->left);
+		deleteHuffmanTree(tree->right);
+
+		delete tree;
+	}
+
+	Node* convertStringToHuffmanTree(string str)
+	{
+		char zeroSymbol = str[0];
+		vector<Node*> nodes;
+
+		for (int i = 0; i < str.size(); ++i)
+		{
+			Node* node = new Node{ str[i] };
+			nodes.push_back(node);
+		}
+
+		Node* cur = nodes[0];
+		auto it = nodes.begin(); it++;
+		vector<Node*> zeroNodes;
+
+		while (it != nodes.end())
+		{
+			Node* left = *it;
+			cur->left = left;
+			++it;
+
+			Node* right = *it;
+			cur->right = right;
+			++it;
+
+			if (left->value == zeroSymbol && right->value == zeroSymbol)
+			{
+				cur = left;
+				zeroNodes.push_back(right);
+			}
+			else if (left->value == zeroSymbol && right->value != zeroSymbol)
+			{
+				cur = left;
+			}
+			else if (left->value != zeroSymbol && right->value == zeroSymbol)
+			{
+				cur = right;
+			}
+			else if (left->value != zeroSymbol && right->value != zeroSymbol && !zeroNodes.empty())
+			{
+				int lastElement = zeroNodes.size() - 1;
+				cur = zeroNodes[lastElement];
+				zeroNodes.pop_back();
+			}
+		}
+
+		return nodes[0];
+	}
+
+	string convertHuffmanTreeToString(Node* tree)
+	{
+		std::string huffmanTreeInText = "";
+		translateHuffmanTreeIntoText(tree, tree->value, huffmanTreeInText);
+		return huffmanTreeInText;
 	}
 
 private:
-	std::vector<int>getWeightsSymbolsFromFile(const std::string& pathForFile)
-	{
-		std::ifstream rfile(pathForFile);
-		std::vector<int> weight(0x100);
-
-		char ch;
-		while (!rfile.eof())
-		{
-			rfile >> ch;
-			++weight[unsigned char(ch)];
-		}
-		rfile.close();
-
-		return weight;
-	}
-
 	pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree, char null_symbol)
 	{
 		int weight_ = 0;
@@ -97,16 +147,19 @@ private:
 
 		return element;
 	}
+
+	void translateHuffmanTreeIntoText(Node* root, char ch, string& huffmanTreeInText)
+	{
+		if (root == nullptr)
+			return;
+
+		if (root->value == ch)
+		{
+			huffmanTreeInText += root->left->value;
+			huffmanTreeInText += root->right->value;
+
+			translateHuffmanTreeIntoText(root->left, ch, huffmanTreeInText);
+			translateHuffmanTreeIntoText(root->right, ch, huffmanTreeInText);
+		}
+	}
 };
-
-void deleteTree(Node* tree)
-{
-	if (tree == nullptr)
-		return;
-
-	if (!tree->left && !tree->right)
-		deleteTree(tree->left);
-		deleteTree(tree->right);
-
-	delete tree;
-}
