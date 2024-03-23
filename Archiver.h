@@ -6,12 +6,9 @@
 
 using namespace std;
 
-vector<int>getByteFrequencyFromFile(const string& pathForFile);
-string getBinaryTextFromFileWithHuffmanCode(map<unsigned char, string>& huffmanCode, const string& pathForFile);
-string convertBinarySequenceToSetBytes(const string& binaryFileText);
-
 class Archiver
 {
+	ofstream archive;
 public:
 	Archiver(const string& pathForArchive)
 	{
@@ -40,8 +37,6 @@ public:
 	}
 
 private:
-	ofstream archive;
-
 	string getFreeFileNameInDirectory(const string& pathForArchive)
 	{
 		if (!fileIsExist(pathForArchive + ".alzip"))
@@ -59,6 +54,23 @@ private:
 				return archiveName;
 			}
 		}
+		return "What_are_YOU";
+	}
+
+	vector<int>getByteFrequencyFromFile(const string& pathForFile)
+	{
+		ifstream rfile(pathForFile);
+		vector<int> byteFrequency(0x100);
+
+		char ch;
+		while (!rfile.eof())
+		{
+			rfile >> ch;
+			++byteFrequency[unsigned char(ch)];
+		}
+		rfile.close();
+
+		return byteFrequency;
 	}
 
 	void writeName(const string& pathForFile)
@@ -92,6 +104,49 @@ private:
 		archive << '<' << tag << '>';
 		archive << endl;
 	}
+
+	string getBinaryTextFromFileWithHuffmanCode(
+		map<unsigned char, string>& huffmanCode,
+		const string& pathForFile
+	) {
+		ifstream rfile(pathForFile, ios::in);
+
+		char ch;
+		string encodeText = "";
+		while (!rfile.eof())
+		{
+			rfile >> ch;
+			encodeText += huffmanCode[ch];
+		}
+		rfile.close();
+
+		return encodeText;
+	}
+
+	string convertBinarySequenceToSetBytes(const string& binaryFileText) {
+		char zeroBitCounter = '0';
+		string byteInString = "",
+			binaryTextInByte = "";
+
+		for (const char& i : binaryFileText)
+		{
+			byteInString += i;
+			if (byteInString.size() == 8)
+			{
+				binaryTextInByte += convertBinarySequenceInByte(byteInString);
+				byteInString = "";
+			}
+		}
+
+		while (byteInString.size() != 8 && byteInString.size() != 0)
+		{
+			byteInString += '0';
+			++zeroBitCounter;
+		}
+		binaryTextInByte += convertBinarySequenceInByte(byteInString);
+
+		return zeroBitCounter + binaryTextInByte;
+	}
 };
 
 void addFileInArchive(Archiver& archive, const string& pathForFile)
@@ -106,63 +161,4 @@ void addFileInArchive(Archiver& archive, const string& pathForFile)
 	{
 		cout << "Error! " << ex.what() << endl << endl;
 	}
-}
-
-vector<int>getByteFrequencyFromFile(const string& pathForFile)
-{
-	ifstream rfile(pathForFile);
-	vector<int> byteFrequency(0x100);
-
-	char ch;
-	while (!rfile.eof())
-	{
-		rfile >> ch;
-		++byteFrequency[unsigned char(ch)];
-	}
-	rfile.close();
-
-	return byteFrequency;
-}
-
-string getBinaryTextFromFileWithHuffmanCode(
-	map<unsigned char, string>& huffmanCode,
-	const string& pathForFile
-) {
-	ifstream rfile(pathForFile, ios::in);
-
-	char ch;
-	string encodeText = "";
-	while (!rfile.eof())
-	{
-		rfile >> ch;
-		encodeText += huffmanCode[ch];
-	}
-	rfile.close();
-
-	return encodeText;
-}
-
-string convertBinarySequenceToSetBytes(const string& binaryFileText) {
-	char zeroBitCounter = '0';
-	string byteInString = "",
-		binaryTextInByte = "";
-
-	for (const char& i : binaryFileText)
-	{
-		byteInString += i;
-		if (byteInString.size() == 8)
-		{
-			binaryTextInByte += convertBinarySequenceInByte(byteInString);
-			byteInString = "";
-		}
-	}
-
-	while (byteInString.size() != 8 && byteInString.size() != 0)
-	{
-		byteInString += '0';
-		++zeroBitCounter;
-	}
-	binaryTextInByte += convertBinarySequenceInByte(byteInString);
-
-	return zeroBitCounter + binaryTextInByte;
 }

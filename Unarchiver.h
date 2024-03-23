@@ -9,26 +9,43 @@ using namespace std;
 
 class Unarchiver
 {
+	ifstream archive;
+	string pathUnzip = getCurrentDirectory();
 public:
-	Unarchiver(std::string pathForArchive, std::string pathUnzip)
+	Unarchiver(string pathForArchive, string _pathUnzip)
 	{
 		if (fileIsExist(pathForArchive))
 		{
 			archive.open(pathForArchive);
-
-			while (!archive.eof())
-			{
-				string fileName = getTextInTagFromFile(archive, Tag::FileName),
-					huffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree),
-					text = getTextInTagFromFile(archive, Tag::Text);
-
-				HuffmanTree tree;
-			}
+			pathUnzip = _pathUnzip;
 		}
 		else
 		{
 			throw exception("Archive not exist!!");
 		}
+	}
+
+	void getFile()
+	{
+		if (archive.eof())
+		{
+			throw exception("You cannot get a new file from the archive!");
+		}
+
+		string && fileName = getTextInTagFromFile(archive, Tag::FileName),
+			&& fileHuffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree),
+			&& fileText = getTextInTagFromFile(archive, Tag::Text);
+
+		auto huffmanTree = HuffmanTree().convertStringToHuffmanTree(fileHuffmanTree);
+		auto reversHummanCode = HuffmanCode().getReverseHuffmanCode(huffmanTree);
+
+		if (fileIsExist(pathUnzip + "\\" + fileName))
+		{
+			fileName = getNewFileNameFromUser(fileName);
+		}
+
+		ofstream wfile(pathUnzip + "\\" + fileName);
+
 	}
 
 	~Unarchiver()
@@ -37,8 +54,6 @@ public:
 	}
 
 private:
-	ifstream archive;
-
 	string getTextInTagFromFile(std::ifstream& rfile, char tag)
 	{
 		optional<string> opt;
@@ -60,7 +75,7 @@ private:
 		smatch result;
 		regex regular(
 			"(<" + string(1, tag) + ">)"
-			"([A-Za-zÀ-ßà-ÿ0-9._-]+)"
+			"([A-Za-zï¿½-ï¿½ï¿½-ï¿½0-9._-]+)"
 			"(<" + string(1, tag) + ">)");
 
 		if (regex_search(str, result, regular))

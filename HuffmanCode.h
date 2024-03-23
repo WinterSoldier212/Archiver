@@ -12,11 +12,12 @@ public:
 		return huffmanCode;
 	}
 
-	map<string, char> getReverseHuffmanCode(map<char, string> HuffmanCode)
+	map<string, char> getReverseHuffmanCode(Node* root)
 	{
+		map<unsigned char, string>&& huffmanCode = getHuffmanCode(root);
 		map<string, char> reverseMap;
 
-		for (auto& i : HuffmanCode)
+		for (auto& i : huffmanCode)
 		{
 			reverseMap.insert(make_pair(i.second, i.first));
 		}

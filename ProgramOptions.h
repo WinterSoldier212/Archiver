@@ -11,7 +11,7 @@ void zip(const po::variables_map& vm)
 {
     std::vector<std::string> files;
     std::string outputFileDirectory = getCurrentDirectory();
-    std::string outputFileName = "Archiv";
+    std::string outputFileName;
 
     if (vm.count("file"))
         files = vm["file"].as<std::vector <std::string> >();
@@ -20,6 +20,8 @@ void zip(const po::variables_map& vm)
 
     if (vm.count("output"))
         outputFileName = vm["output"].as<std::string>();
+    else
+        outputFileName = files.at(0);
 
     if (vm.count("dir"))
         outputFileDirectory = vm["dir"].as<std::string>();
