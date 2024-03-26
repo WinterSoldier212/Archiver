@@ -5,11 +5,8 @@
 
 namespace po = boost::program_options;
 
-int main()
+int main(int argc, char* argv[])
 {
-    int argc = 6;
-    const char* argv[] = { "Archiver.exe", "--zip", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\main.cpp", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\Archive.h", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\HuffmanCode.h", "-fC:\\Users\\2020k\\source\\repos\\Archiver\\FileFunctions.h" };
-
     po::options_description desc("Required options");
     desc.add_options()
         ("zip,z", "Main flag-option for zipping file(s).")
@@ -25,7 +22,7 @@ int main()
 
     po::options_description unzip_desc("Unzip options");
     unzip_desc.add_options()
-        ("file,f", po::value<std::vector<std::string> >(), "Archive that will be unzipping. Must be indicated!")
+        ("archive,a", po::value<std::vector<std::string> >(), "Archive that will be unzipping. Must be indicated!")
         ("dir,d", po::value<std::string>(), "Directory output files.")
         ;
 

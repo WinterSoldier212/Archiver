@@ -10,9 +10,9 @@ class Archiver
 {
 	ofstream archive;
 public:
-	Archiver(const string& pathForArchive)
+	Archiver(string& pathForNewArchive)
 	{
-		string archiveName = getFreeFileNameInDirectory(pathForArchive);
+		string archiveName = getFreeFileNameInDirectory(pathForNewArchive);
 		archive.open(archiveName, ios::out | ios::app);
 	}
 
@@ -23,17 +23,26 @@ public:
 
 	void addFile(const string& pathForFile)
 	{
-		if (!fileIsExist(pathForFile)) {;
+		if (!fileIsExist(pathForFile)) 
+		{
 			throw exception("File is not exist!");
 		}
 
-		auto byteFrequency = getByteFrequencyFromFile(pathForFile);
-		auto huffmanTree = HuffmanTree().getHuffmanTree(byteFrequency);
-		auto huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
+		auto&& byteFrequency = getByteFrequencyFromFile(pathForFile);
+		auto&& huffmanTree = HuffmanTree().getHuffmanTree(byteFrequency);
+		auto&& huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
 
-		writeName(pathForFile);
-		writeHuffmanTree(huffmanTree);
-		writeText(huffmanTree, pathForFile);
+		string
+			&& fileName = getFileNameFromPath(pathForFile),
+			&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree),
+			&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile),
+			&& textFromFileModifiedWithHuffmanCode = convertBinarySequenceToSetBytes(binaryText);
+		
+		HuffmanTree().deleteHuffmanTree(huffmanTree);
+
+		writeTextWithTagToFile(fileName, Tag::FileName);
+		writeTextWithTagToFile(huffmanTreeInText, Tag::HuffmanTree);
+		writeTextWithTagToFile(textFromFileModifiedWithHuffmanCode, Tag::Text);
 	}
 
 private:
@@ -71,30 +80,6 @@ private:
 		rfile.close();
 
 		return byteFrequency;
-	}
-
-	void writeName(const string& pathForFile)
-	{
-		string fileName = getFileNameFromPath(pathForFile);
-
-		writeTextWithTagToFile(fileName, Tag::FileName);
-	}
-
-	void writeHuffmanTree(Node* huffmanTree)
-	{
-		string huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree);
-		HuffmanTree().deleteHuffmanTree(huffmanTree);
-
-		writeTextWithTagToFile(huffmanTreeInText, Tag::HuffmanTree);
-	}
-
-	void writeText(Node* huffmanTree, const string& pathForFile)
-	{
-		auto huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
-		string binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile);
-		string textFromFileModifiedWithHuffmanCode = convertBinarySequenceToSetBytes(binaryText);
-
-		writeTextWithTagToFile(textFromFileModifiedWithHuffmanCode, Tag::Text);
 	}
 
 	void writeTextWithTagToFile(string text, char tag)

@@ -12,12 +12,11 @@ class Unarchiver
 	ifstream archive;
 	string pathUnzip = getCurrentDirectory();
 public:
-	Unarchiver(string pathForArchive, string _pathUnzip)
+	Unarchiver(string pathForArchive)
 	{
 		if (fileIsExist(pathForArchive))
 		{
 			archive.open(pathForArchive);
-			pathUnzip = _pathUnzip;
 		}
 		else
 		{
@@ -25,26 +24,27 @@ public:
 		}
 	}
 
-	void getFile()
+	void getFile(const string& outputFileDirectory)
 	{
 		if (archive.eof())
 		{
 			throw exception("You cannot get a new file from the archive!");
 		}
 
-		string && fileName = getTextInTagFromFile(archive, Tag::FileName),
+		string 
+			&& fileName = getTextInTagFromFile(archive, Tag::FileName),
 			&& fileHuffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree),
 			&& fileText = getTextInTagFromFile(archive, Tag::Text);
 
 		auto huffmanTree = HuffmanTree().convertStringToHuffmanTree(fileHuffmanTree);
 		auto reversHummanCode = HuffmanCode().getReverseHuffmanCode(huffmanTree);
 
-		if (fileIsExist(pathUnzip + "\\" + fileName))
+		if (fileIsExist(outputFileDirectory + "\\" + fileName))
 		{
-			fileName = getNewFileNameFromUser(fileName);
+		//	fileName = getNewFileNameFromUser(fileName);
 		}
 
-		ofstream wfile(pathUnzip + "\\" + fileName);
+		ofstream wfile(outputFileDirectory + "\\" + fileName);
 
 	}
 
@@ -85,3 +85,17 @@ private:
 		return nullopt;
 	}
 };
+
+void getFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
+{
+	try
+	{
+		cout << "Trying to get a file - " << outputFileDirectory << endl;
+		Unarchiver.getFile(outputFileDirectory);
+		cout << "The file has been successfully unarchived!" << endl << endl;
+	}
+	catch (exception& ex)
+	{
+		cout << "Error! " << ex.what() << endl << endl;
+	}
+}
