@@ -21,13 +21,25 @@ bool fileIsExist(const string& pathForFile)
 	return isExist;
 }
 
-string getFileNameFromPath(string path)
+string getFullFileNameFromPath(string path)
 {
 	filesystem::path filePath(path);
 	return filePath.filename().string();
 }
 
+string getFileNameFromPath(string path)
+{
+	filesystem::path filePath(path);
+	return filePath.stem().string();
+}
+
+string getFileExtensionFromPath(string path)
+{
+	filesystem::path filePath(path);
+	return filePath.extension().string();
+}
+
 string getCurrentDirectory()
 {
-	return filesystem::current_path().string() + "\\";
+	return filesystem::current_path().string();
 }

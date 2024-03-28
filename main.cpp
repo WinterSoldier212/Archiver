@@ -49,7 +49,8 @@ int main(int argc, char* argv[])
             showHelpOptions(desc);
         }
     }
-    catch (std::exception& ex) {
+    catch (std::exception& ex) 
+    {
         std::cout << ex.what() << std::endl;
     }
 

@@ -7,61 +7,84 @@
 
 namespace po = boost::program_options;
 
-vector<string> getFilesFromVM(const po::variables_map& vm)
-{
-    if (vm.count("file"))
-        return vm["file"].as<vector <string> >();
-    else
-        throw exception("You must specify at least one file to be archived!");
-}
-
-string getArchiveFromVM(const po::variables_map& vm)
-{
-    if (vm.count("archive"))
-        return vm["archive"].as<string>();
-    else
-        throw exception("You must specify the archive that needs to be unpacked!");
-}
-
-string getOutputFileDirectoryFromVM(const po::variables_map& vm)
-{
-    if (vm.count("output"))
-        return vm["output"].as<string>();
-    else
-        return "Archive";
-}
-
-string getOutputFileNameFromVM(const po::variables_map& vm)
-{
-    if (vm.count("dir"))
-        return vm["dir"].as<string>();
-    else
-        return getCurrentDirectory();
-}
-
 void zip(const po::variables_map& vm)
 {
-    vector<string> files = getFilesFromVM(vm);
-    string outputFileDirectory = getOutputFileDirectoryFromVM(vm);
-    string outputFileName = getOutputFileNameFromVM(vm);
+    vector<string> files;
+    string outputFileDirectory;
+    string outputFileName;
    
-    string pathForNewArchive = outputFileDirectory + outputFileName;
-    
+    {
+        if (vm.count("file"))
+        {
+            files = vm["file"].as<vector <string> >();
+        }
+        else
+        {
+            throw exception("You must specify at least one file to be archived!");
+        }
+    }
+    {
+        if (vm.count("output"))
+        {
+            outputFileName = vm["output"].as<string>();
+        }
+        else
+        {
+            outputFileName = getFileNameFromPath(files.at(0));
+            cout << outputFileName << endl << endl;
+        }
+    }
+    {
+        if (vm.count("dir"))
+        {
+            outputFileDirectory = vm["dir"].as<string>();
+        }
+        else
+        {
+            outputFileDirectory = getCurrentDirectory();
+        }
+    }
+
+    string pathForNewArchive = outputFileDirectory + "\\" + outputFileName;
+
     Archiver archive(pathForNewArchive);
-    for (const auto& file : files) {
+    for (const auto& file : files) 
+    {
         addFileInArchive(archive, file);
     }
 }
 
 void unzip(const po::variables_map& vm)
 {
-    string archive = getArchiveFromVM(vm);
-    string outputFileDirectory = getOutputFileDirectoryFromVM(vm);
+    string archive;
+    string outputFileDirectory;
 
-    Unarchiver unarchiver(archive);
-    while (true) {
-        getFileFromArchive(unarchiver, outputFileDirectory);
+    {
+        if (vm.count("archive"))
+        {
+            archive = vm["archive"].as<string>();
+        }
+        else
+        {
+            throw exception("You must specify the archive that needs to be unpacked!");
+        }
     }
+    {
+        if (vm.count("dir"))
+        {
+            outputFileDirectory = vm["dir"].as<string>();
+        }
+        else
+        {
+            outputFileDirectory = getCurrentDirectory();
+        }
+    }
+
+    bool archiveHasFile = false;
+    Unarchiver unarchiver(archive);
+    do {
+        archiveHasFile = extractFileFromArchive(unarchiver, outputFileDirectory);
+    } while (archiveHasFile);
 }
 
 void showHelpOptions(const po::options_description& desc)

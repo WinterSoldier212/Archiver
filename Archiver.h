@@ -33,7 +33,7 @@ public:
 		auto&& huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
 
 		string
-			&& fileName = getFileNameFromPath(pathForFile),
+			&& fileName = getFullFileNameFromPath(pathForFile),
 			&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree),
 			&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile),
 			&& textFromFileModifiedWithHuffmanCode = convertBinarySequenceToSetBytes(binaryText);

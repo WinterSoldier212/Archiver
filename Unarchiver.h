@@ -24,11 +24,11 @@ public:
 		}
 	}
 
-	void getFile(const string& outputFileDirectory)
+	void extractFile(const string& outputFileDirectory)
 	{
 		if (archive.eof())
 		{
-			throw exception("You cannot get a new file from the archive!");
+			throw exception("");
 		}
 
 		string 
@@ -86,16 +86,19 @@ private:
 	}
 };
 
-void getFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
+bool extractFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
 {
 	try
 	{
 		cout << "Trying to get a file - " << outputFileDirectory << endl;
-		Unarchiver.getFile(outputFileDirectory);
+		Unarchiver.extractFile(outputFileDirectory);
 		cout << "The file has been successfully unarchived!" << endl << endl;
+
+		return true;
 	}
 	catch (exception& ex)
 	{
-		cout << "Error! " << ex.what() << endl << endl;
+		cout << "The file could not be extracted from the archive." << endl << endl;
+		return false;
 	}
 }
