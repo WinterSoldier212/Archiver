@@ -79,12 +79,12 @@ private:
 	}
 };
 
-bool ExtractFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
+bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDirectory)
 {
 	try
 	{
-		logFile << "Trying to extract file from Archive - " << Unarchiver.GetName() << endl;
-		Unarchiver.ExtractFile(outputFileDirectory);
+		logFile << "Trying to extract file from Archive - " << unarchiver.GetName() << endl;
+		unarchiver.ExtractFile(outputFileDirectory);
 		logFile << "The file has been successfully extracted!" << endl;
 	}
 	catch (ExceptionArchiveNotOpen& ex)
@@ -97,7 +97,7 @@ bool ExtractFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDire
 	}
 }
 
-void ExtractAllFilesFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
+void ExtractAllFilesFromArchive(Unarchiver& unarchiver, const string& outputFileDirectory)
 {
-
+	while (ExtractFileFromArchive(unarchiver, outputFileDirectory));
 }

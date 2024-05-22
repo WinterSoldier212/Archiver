@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <boost/program_options.hpp>
 #include "Archiver.h"
@@ -80,11 +81,10 @@ void unzip(const po::variables_map& vm)
         }
     }
 
-    bool archiveHasFile = false;
-    Unarchiver unarchiver(archive);
-    do {
-        archiveHasFile = extractFileFromArchive(unarchiver, outputFileDirectory);
-    } while (archiveHasFile);
+    Unarchiver unarchiver;
+    unarchiver.Open(archive);
+
+    ExtractAllFilesFromArchive(unarchiver, outputFileDirectory);
 }
 
 void showHelpOptions(const po::options_description& desc)
