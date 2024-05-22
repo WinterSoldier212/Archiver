@@ -43,3 +43,23 @@ string getCurrentDirectory()
 {
 	return filesystem::current_path().string();
 }
+
+string getFreeFileNameInDirectory(const string& pathForFile, const string& expansion)
+{
+	if (!fileIsExist(pathForFile + expansion))
+	{
+		return pathForFile + expansion;
+	}
+
+	string fileName;
+	for (int i = 1; 1 < 100'000; ++i)
+	{
+		fileName = pathForFile + to_string(i) + expansion;
+
+		if (!fileIsExist(fileName))
+		{
+			return fileName;
+		}
+	}
+	throw exception("WHAT ARE YOU!!!");
+}

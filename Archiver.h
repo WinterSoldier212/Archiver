@@ -1,43 +1,39 @@
 #pragma once
 
 #include <map>
-#include <iostream>
 #include "ArchiveHeaders.h"
 
 using namespace std;
 
-class Archiver
+class Archiver : public Archive
 {
-	ofstream archive;
 public:
-	Archiver(string& pathForNewArchive)
-	{
-		string archiveName = getFreeFileNameInDirectory(pathForNewArchive);
-		archive.open(archiveName, ios::out | ios::app);
-	}
-
+	Archiver() = default;
 	~Archiver()
 	{
-		archive.close();
+		Close();
 	}
 
-	void addFile(const string& pathForFile)
+	void AddFile(const string& pathForFile)
 	{
-		if (!fileIsExist(pathForFile)) 
+		if (!fileIsExist(pathForFile))
 		{
-			throw exception("File is not exist!");
+			throw ExceptionFileNotExist(pathForFile);
+		}
+		if (!IsOpen())
+		{
+			throw ExceptionArchiveNotOpen(archiveName);
 		}
 
 		auto&& byteFrequency = getByteFrequencyFromFile(pathForFile);
 		auto&& huffmanTree = HuffmanTree().getHuffmanTree(byteFrequency);
 		auto&& huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
 
-		string
-			&& fileName = getFullFileNameFromPath(pathForFile),
-			&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree),
-			&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile),
-			&& textFromFileModifiedWithHuffmanCode = convertBinarySequenceToSetBytes(binaryText);
-		
+		string&& fileName = getFullFileNameFromPath(pathForFile);
+		string&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree);
+		string&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile);
+		string&& textFromFileModifiedWithHuffmanCode = Convert.binarySequenceToSetBytes(binaryText);
+
 		HuffmanTree().deleteHuffmanTree(huffmanTree);
 
 		writeTextWithTagToFile(fileName, Tag::FileName);
@@ -46,26 +42,6 @@ public:
 	}
 
 private:
-	string getFreeFileNameInDirectory(const string& pathForArchive)
-	{
-		if (!fileIsExist(pathForArchive + ".alzip"))
-		{
-			return pathForArchive + ".alzip";
-		}
-
-		string archiveName;
-		for (int i = 1; 1 < 100'000; ++i)
-		{
-			archiveName = pathForArchive + to_string(i) + ".alzip";
-			
-			if (!fileIsExist(archiveName))
-			{
-				return archiveName;
-			}
-		}
-		return "What_are_YOU";
-	}
-
 	vector<int>getByteFrequencyFromFile(const string& pathForFile)
 	{
 		ifstream rfile(pathForFile);
@@ -107,43 +83,33 @@ private:
 
 		return encodeText;
 	}
-
-	string convertBinarySequenceToSetBytes(const string& binaryFileText) {
-		char zeroBitCounter = '0';
-		string byteInString = "",
-			binaryTextInByte = "";
-
-		for (const char& i : binaryFileText)
-		{
-			byteInString += i;
-			if (byteInString.size() == 8)
-			{
-				binaryTextInByte += convertBinarySequenceInByte(byteInString);
-				byteInString = "";
-			}
-		}
-
-		while (byteInString.size() != 8 && byteInString.size() != 0)
-		{
-			byteInString += '0';
-			++zeroBitCounter;
-		}
-		binaryTextInByte += convertBinarySequenceInByte(byteInString);
-
-		return zeroBitCounter + binaryTextInByte;
-	}
 };
 
-void addFileInArchive(Archiver& archive, const string& pathForFile)
+void AddFileInArchive(Archiver& archive, const string& pathForFile)
 {
 	try
 	{
-		cout << "Trying to write a file - " << pathForFile << endl;
-		archive.addFile(pathForFile);
-		cout << "The file has been successfully archived!" << endl << endl;
+		logFile << "Trying to write a file - " << pathForFile << " in Archive - " << archive.GetName() << endl;
+		archive.AddFile(pathForFile);
+		logFile << "The file has been successfully archived!" << endl;
 	}
-	catch (exception& ex)
+	catch (ExceptionArchiveNotOpen& ex)
 	{
-		cout << "Error! " << ex.what() << endl << endl;
+		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
+	}
+	catch (ExceptionFileNotExist& ex)
+	{
+		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetFileName() << endl;
+	}
+}
+
+void AddDirectoryInArchive(Archiver& archive, const string& pathForDirectory)
+{
+	for (const auto& entry : filesystem::recursive_directory_iterator(pathForDirectory))
+	{
+		if (entry.is_directory())
+			AddDirectoryInArchive(archive, entry.path().string());
+
+		AddFileInArchive(archive, entry.path().string());
 	}
 }

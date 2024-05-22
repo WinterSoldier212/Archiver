@@ -31,7 +31,6 @@ void zip(const po::variables_map& vm)
         else
         {
             outputFileName = getFileNameFromPath(files.at(0));
-            cout << outputFileName << endl << endl;
         }
     }
     {
@@ -47,10 +46,11 @@ void zip(const po::variables_map& vm)
 
     string pathForNewArchive = outputFileDirectory + "\\" + outputFileName;
 
-    Archiver archive(pathForNewArchive);
+    Archiver archive;
+    archive.Open(pathForNewArchive);
     for (const auto& file : files) 
     {
-        addFileInArchive(archive, file);
+        AddFileInArchive(archive, file);
     }
 }
 

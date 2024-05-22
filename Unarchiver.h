@@ -7,54 +7,47 @@
 
 using namespace std;
 
-class Unarchiver
+class Unarchiver : public Archive
 {
-	ifstream archive;
-	string pathUnzip = getCurrentDirectory();
 public:
-	Unarchiver(string pathForArchive)
+	Unarchiver() = default;
+	~Unarchiver()
 	{
-		if (fileIsExist(pathForArchive))
-		{
-			archive.open(pathForArchive);
-		}
-		else
-		{
-			throw exception("Archive not exist!!");
-		}
+		Close();
 	}
 
-	void extractFile(const string& outputFileDirectory)
+	void ExtractFile(const string& outputFileDirectory)
 	{
+		if (!IsOpen())
+		{
+			throw ExceptionArchiveNotOpen(archiveName);
+		}
 		if (archive.eof())
 		{
-			throw exception("");
+			throw ExceptionArchiveEof(archiveName);
 		}
 
-		string 
-			&& fileName = getTextInTagFromFile(archive, Tag::FileName),
-			&& fileHuffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree),
-			&& fileText = getTextInTagFromFile(archive, Tag::Text);
+		string&& fileName = getTextInTagFromFile(archive, Tag::FileName);
+		string&& fileHuffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree);
+		string&& fileText = getTextInTagFromFile(archive, Tag::Text);
 
 		auto huffmanTree = HuffmanTree().convertStringToHuffmanTree(fileHuffmanTree);
 		auto reversHummanCode = HuffmanCode().getReverseHuffmanCode(huffmanTree);
 
 		if (fileIsExist(outputFileDirectory + "\\" + fileName))
 		{
-		//	fileName = getNewFileNameFromUser(fileName);
+			string clearFileName = getFileNameFromPath(fileName);
+			string clearFileExtension = getFileExtensionFromPath(fileName);
+
+			fileName = getFreeFileNameInDirectory(outputFileDirectory + "\\" + clearFileName, clearFileExtension);
 		}
 
 		ofstream wfile(outputFileDirectory + "\\" + fileName);
 
 	}
 
-	~Unarchiver()
-	{
-		archive.close();
-	}
-
 private:
-	string getTextInTagFromFile(std::ifstream& rfile, char tag)
+	string getTextInTagFromFile(std::fstream& rfile, char tag)
 	{
 		optional<string> opt;
 		std::string str,
@@ -62,7 +55,7 @@ private:
 
 		while (!opt.has_value())
 		{
-			rfile >> str;
+			getline(rfile, str);
 			textWithTagFromFile += str;
 			opt = ejectContentFromTag(textWithTagFromFile, tag);
 		}
@@ -86,19 +79,25 @@ private:
 	}
 };
 
-bool extractFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
+bool ExtractFileFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
 {
 	try
 	{
-		cout << "Trying to get a file - " << outputFileDirectory << endl;
-		Unarchiver.extractFile(outputFileDirectory);
-		cout << "The file has been successfully unarchived!" << endl << endl;
-
-		return true;
+		logFile << "Trying to extract file from Archive - " << Unarchiver.GetName() << endl;
+		Unarchiver.ExtractFile(outputFileDirectory);
+		logFile << "The file has been successfully extracted!" << endl;
 	}
-	catch (exception& ex)
+	catch (ExceptionArchiveNotOpen& ex)
 	{
-		cout << "The file could not be extracted from the archive." << endl << endl;
-		return false;
+		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
 	}
+	catch (ExceptionArchiveEof& ex)
+	{
+		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
+	}
+}
+
+void ExtractAllFilesFromArchive(Unarchiver& Unarchiver, const string& outputFileDirectory)
+{
+
 }
