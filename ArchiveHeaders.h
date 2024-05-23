@@ -9,58 +9,7 @@
 #include "FileFunctions.h"
 #include "Convert.h"
 
-ofstream logFile(getCurrentDirectory()+"log.txt");
-
-class Archive
-{
-protected:
-	fstream archive;
-	string archiveName;
-
-public:
-	Archive() = default;
-
-	void Create(string pathForNewArhcive)
-	{
-		Close();
-
-		archive.open(pathForNewArhcive, ios::out);
-	}
-	void Open(string pathForArhcive)
-	{
-		if (!fileIsExist(pathForArhcive))
-		{
-			throw ExceptionFileNotExist(pathForArhcive);
-		}
-		Close();
-
-		archive.open(pathForArhcive, ios::app);
-	}
-	void Close()
-	{
-		if (IsOpen())
-		{
-			archive.close();
-		}
-	}
-
-	bool IsOpen()
-	{
-		return archive.is_open();
-	}
-	string GetName()
-	{
-		return archiveName;
-	}
-};
-
-namespace Tag
-{
-	const char 
-		FileName = 'n',
-		HuffmanTree = 'h',
-		Text = 't';
-}
+ofstream logFile(getCurrentDirectory()+"\\log.txt");
 
 class ExceptionFileNotExist : public exception
 {
@@ -103,3 +52,40 @@ public:
 		return archiveName_;
 	}
 };
+
+class Archive
+{
+protected:
+	fstream archive;
+	string archiveName;
+
+public:
+	Archive() = default;
+
+	virtual void Open(string pathForArhcive) = 0;
+
+	void Close()
+	{
+		if (IsOpen())
+		{
+			archive.close();
+		}
+	}
+
+	bool IsOpen()
+	{
+		return archive.is_open();
+	}
+	string GetName()
+	{
+		return archiveName;
+	}
+};
+
+namespace Tag
+{
+	const char 
+		FileName = 'n',
+		HuffmanTree = 'h',
+		Text = 't';
+}

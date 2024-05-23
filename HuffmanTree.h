@@ -76,7 +76,7 @@ public:
 		char zeroSymbol = str[0];
 		vector<Node*> nodes;
 
-		for (int i = 0; i < str.size(); ++i)
+		for (unsigned long long i = 0; i < str.size(); ++i)
 		{
 			Node* node = new Node{ str[i] };
 			nodes.push_back(node);

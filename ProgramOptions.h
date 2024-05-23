@@ -48,22 +48,23 @@ void zip(const po::variables_map& vm)
     string pathForNewArchive = outputFileDirectory + "\\" + outputFileName;
 
     Archiver archive;
-    archive.Open(pathForNewArchive);
+    archive.Create(pathForNewArchive);
     for (const auto& file : files) 
     {
+        cout << file << endl;
         AddFileInArchive(archive, file);
     }
 }
 
 void unzip(const po::variables_map& vm)
 {
-    string archive;
+    vector<string> archives;
     string outputFileDirectory;
 
     {
         if (vm.count("archive"))
         {
-            archive = vm["archive"].as<string>();
+            archives = vm["archive"].as<std::vector<string> >();
         }
         else
         {
@@ -81,14 +82,17 @@ void unzip(const po::variables_map& vm)
         }
     }
 
-    Unarchiver unarchiver;
-    unarchiver.Open(archive);
+    for (auto archive : archives)
+    {
+        Unarchiver unarchiver;
+        unarchiver.Open(archive);
 
-    ExtractAllFilesFromArchive(unarchiver, outputFileDirectory);
+        cout << archive << endl;
+        ExtractAllFilesFromArchive(unarchiver, outputFileDirectory);
+    }
 }
 
 void showHelpOptions(const po::options_description& desc)
 {
     cout << desc;
-    system("pause>null");
 }

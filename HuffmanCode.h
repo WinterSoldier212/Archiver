@@ -5,14 +5,14 @@
 class HuffmanCode
 {
 public:
-	map<unsigned char, string> getHuffmanCode(Node* root)
+	static map<unsigned char, string> getHuffmanCode(Node* root)
 	{
 		map<unsigned char, string> huffmanCode;
 		createHuffmanCode(root, "", huffmanCode);
 		return huffmanCode;
 	}
 
-	map<string, char> getReverseHuffmanCode(Node* root)
+	static map<string, char> getReverseHuffmanCode(Node* root)
 	{
 		map<unsigned char, string>&& huffmanCode = getHuffmanCode(root);
 		map<string, char> reverseMap;
@@ -25,7 +25,7 @@ public:
 		return reverseMap;
 	}
 private:
-	void createHuffmanCode(Node* root, std::string str, std::map<unsigned char, string>& huffmanCode)
+	static void createHuffmanCode(Node* root, std::string str, std::map<unsigned char, string>& huffmanCode)
 	{
 		if (root == nullptr)
 			return;

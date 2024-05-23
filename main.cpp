@@ -15,15 +15,15 @@ int main(int argc, char* argv[])
 
     po::options_description zip_desc("Zip options");
     zip_desc.add_options()
-        ("file,f", po::value<std::vector<std::string> >(), "File that will be zipping. Must be indicated!")
-        ("output,o", po::value<std::string>(), "Output file-archive name.")
-        ("dir,d", po::value<std::string>(), "Directory output file-archive.")
+        ("file,f", po::value<std::vector<std::string> >()->required(), "File that will be zipping. Must be indicated!")
+        ("output,o", po::value<std::string>()->required(), "Output file-archive name.")
+        ("dir,d", po::value<std::string>()->required(), "Directory output file-archive.")
         ;
 
     po::options_description unzip_desc("Unzip options");
     unzip_desc.add_options()
-        ("archive,a", po::value<std::vector<std::string> >(), "Archive that will be unzipping. Must be indicated!")
-        ("dir,d", po::value<std::string>(), "Directory output files.")
+        ("archive,a", po::value<std::vector<std::string> >()->required(), "Archive that will be unzipping. Must be indicated!")
+        ("dir,d", po::value<std::string>()->required(), "Directory output files.")
         ;
 
     po::variables_map vm;

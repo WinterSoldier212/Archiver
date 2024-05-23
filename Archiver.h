@@ -14,6 +14,26 @@ public:
 		Close();
 	}
 
+	void Create(string pathForNewArhcive)
+	{
+		Close();
+
+		archiveName = pathForNewArhcive;
+		archive.open(pathForNewArhcive, ios::out);
+	}
+
+	virtual void Open(string pathForArhcive) override
+	{
+		if (!fileIsExist(pathForArhcive))
+		{
+			throw ExceptionFileNotExist(pathForArhcive);
+		}
+		Close();
+
+		archiveName = pathForArhcive;
+		archive.open(pathForArhcive, ios::app);
+	}
+
 	void AddFile(const string& pathForFile)
 	{
 		if (!fileIsExist(pathForFile))
@@ -89,9 +109,9 @@ void AddFileInArchive(Archiver& archive, const string& pathForFile)
 {
 	try
 	{
-		logFile << "Trying to write a file - " << pathForFile << " in Archive - " << archive.GetName() << endl;
+		logFile << __TIME__  << " Trying to write a file - " << pathForFile << " in Archive - " << archive.GetName() << endl;
 		archive.AddFile(pathForFile);
-		logFile << "The file has been successfully archived!" << endl;
+		logFile << __TIME__  << " The file has been successfully archived!" << endl;
 	}
 	catch (ExceptionArchiveNotOpen& ex)
 	{

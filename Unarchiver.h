@@ -2,6 +2,7 @@
 
 #include <regex>
 #include <optional>
+#include <iostream>
 
 #include "ArchiveHeaders.h"
 
@@ -14,6 +15,18 @@ public:
 	~Unarchiver()
 	{
 		Close();
+	}
+
+	virtual void Open(string pathForArhcive) override
+	{
+		if (!fileIsExist(pathForArhcive))
+		{
+			throw ExceptionFileNotExist(pathForArhcive);
+		}
+		Close();
+
+		archiveName = pathForArhcive;
+		archive.open(pathForArhcive, ios::in);
 	}
 
 	void ExtractFile(const string& outputFileDirectory)
@@ -32,7 +45,9 @@ public:
 		string&& fileText = getTextInTagFromFile(archive, Tag::Text);
 
 		auto huffmanTree = HuffmanTree().convertStringToHuffmanTree(fileHuffmanTree);
-		auto reversHummanCode = HuffmanCode().getReverseHuffmanCode(huffmanTree);
+		cout << 15 << endl;
+		auto reverseHummanCode = HuffmanCode::getReverseHuffmanCode(huffmanTree);
+		cout << 15 << endl;
 
 		if (fileIsExist(outputFileDirectory + "\\" + fileName))
 		{
@@ -41,9 +56,34 @@ public:
 
 			fileName = getFreeFileNameInDirectory(outputFileDirectory + "\\" + clearFileName, clearFileExtension);
 		}
+		cout << 16 << endl;
 
 		ofstream wfile(outputFileDirectory + "\\" + fileName);
+		
+		cout << fileText << endl << endl;
 
+		string binaryFileText = "";
+		for (char ch : fileText)
+		{
+			binaryFileText += Convert.byteToBinarySequence(ch);
+		}
+
+		cout << binaryFileText << endl << endl;
+
+		int zeroBits = fileText[0] - '0';
+		int clearLenghtBinaryFileText = binaryFileText.length() - zeroBits;
+
+		string binarySetForWriteInFile = "";
+		for (int i = 8; i < clearLenghtBinaryFileText; i++)
+		{
+			binarySetForWriteInFile += binaryFileText[i];
+
+			if (reverseHummanCode.count(binarySetForWriteInFile))
+			{
+				wfile << reverseHummanCode.at(binarySetForWriteInFile);
+				binarySetForWriteInFile = "";
+			}
+		}
 	}
 
 private:
@@ -68,7 +108,7 @@ private:
 		smatch result;
 		regex regular(
 			"(<" + string(1, tag) + ">)"
-			"([A-Za-z�-��-�0-9._-]+)"
+			"([\\s\\S]+)"
 			"(<" + string(1, tag) + ">)");
 
 		if (regex_search(str, result, regular))
@@ -83,9 +123,10 @@ bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDire
 {
 	try
 	{
-		logFile << "Trying to extract file from Archive - " << unarchiver.GetName() << endl;
+		logFile << __TIME__  << " Trying to extract file from Archive - " << unarchiver.GetName() << endl;
 		unarchiver.ExtractFile(outputFileDirectory);
-		logFile << "The file has been successfully extracted!" << endl;
+		logFile << __TIME__ << " The file has been successfully extracted!" << endl;
+		return true;
 	}
 	catch (ExceptionArchiveNotOpen& ex)
 	{
@@ -95,6 +136,7 @@ bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDire
 	{
 		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
 	}
+	return false;
 }
 
 void ExtractAllFilesFromArchive(Unarchiver& unarchiver, const string& outputFileDirectory)
