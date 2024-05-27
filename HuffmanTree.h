@@ -29,7 +29,7 @@ public:
 		char symbol, null_symbol = 0;
 		int byteWeight;
 
-		for (int i = 0; i < 0x100; ++i)
+		for (int i = 31; i < 0x100; ++i)
 		{
 			if (byteWeights.at(i) == 0)
 			{
