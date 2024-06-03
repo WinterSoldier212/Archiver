@@ -87,7 +87,6 @@ void unzip(const po::variables_map& vm)
         Unarchiver unarchiver;
         unarchiver.Open(archive);
 
-        cout << archive << endl;
         ExtractAllFilesFromArchive(unarchiver, outputFileDirectory);
     }
 }

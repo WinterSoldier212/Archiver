@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <regex>
 #include <optional>
@@ -33,10 +33,12 @@ public:
 	{
 		if (!IsOpen())
 		{
+			logFile << outputFileDirectory << " Error Open!" << endl;
 			throw ExceptionArchiveNotOpen(archiveName);
 		}
 		if (archive.eof())
 		{
+			logFile << archiveName << " Archive EOF!" << endl;
 			throw ExceptionArchiveEof(archiveName);
 		}
 
@@ -45,9 +47,7 @@ public:
 		string&& fileText = getTextInTagFromFile(archive, Tag::Text);
 
 		auto huffmanTree = HuffmanTree().convertStringToHuffmanTree(fileHuffmanTree);
-		cout << 15 << endl;
-		auto reverseHummanCode = HuffmanCode::getReverseHuffmanCode(huffmanTree);
-		cout << 15 << endl;
+		auto reverseHummanCode = HuffmanCode().getReverseHuffmanCode(huffmanTree);
 
 		if (fileIsExist(outputFileDirectory + "\\" + fileName))
 		{
@@ -56,20 +56,19 @@ public:
 
 			fileName = getFreeFileNameInDirectory(outputFileDirectory + "\\" + clearFileName, clearFileExtension);
 		}
-		cout << 16 << endl;
+		else
+		{
+			fileName = outputFileDirectory + "\\" + fileName;
+		}
 
-		ofstream wfile(outputFileDirectory + "\\" + fileName);
-		
-		cout << fileText << endl << endl;
+		ofstream wfile(fileName, ios::binary | ios::out);
 
 		string binaryFileText = "";
 		for (char ch : fileText)
 		{
 			binaryFileText += Convert.byteToBinarySequence(ch);
 		}
-
-		cout << binaryFileText << endl << endl;
-
+		cout << binaryFileText;
 		int zeroBits = fileText[0] - '0';
 		int clearLenghtBinaryFileText = binaryFileText.length() - zeroBits;
 
@@ -80,10 +79,11 @@ public:
 
 			if (reverseHummanCode.count(binarySetForWriteInFile))
 			{
-				wfile << reverseHummanCode.at(binarySetForWriteInFile);
+				wfile << (reverseHummanCode.at(binarySetForWriteInFile));
 				binarySetForWriteInFile = "";
 			}
 		}
+		wfile.close();
 	}
 
 private:
@@ -108,7 +108,7 @@ private:
 		smatch result;
 		regex regular(
 			"(<" + string(1, tag) + ">)"
-			"([\\s\\S]+)"
+			"([\\s\\S]*)"
 			"(<" + string(1, tag) + ">)");
 
 		if (regex_search(str, result, regular))
@@ -123,20 +123,26 @@ bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDire
 {
 	try
 	{
-		logFile << __TIME__  << " Trying to extract file from Archive - " << unarchiver.GetName() << endl;
+		logFile << __TIME__ << " Trying to extract file from Archive - " << unarchiver.GetName() << endl;
 		unarchiver.ExtractFile(outputFileDirectory);
 		logFile << __TIME__ << " The file has been successfully extracted!" << endl;
-		return true;
+		return false;
 	}
 	catch (ExceptionArchiveNotOpen& ex)
 	{
 		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
+		return false;
 	}
 	catch (ExceptionArchiveEof& ex)
 	{
 		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
+		return false;
 	}
-	return false;
+	catch (exception& ex)
+	{
+		cout << ex.what();
+		return false;
+	}
 }
 
 void ExtractAllFilesFromArchive(Unarchiver& unarchiver, const string& outputFileDirectory)

@@ -93,10 +93,10 @@ private:
 
 	void writeTextWithTagToFile(string text, char tag)
 	{
-		archive << '<' << tag << '>';
+		archive.put('<').put(tag).put('>');
 		archive << text;
-		archive << '<' << tag << '>';
-		archive << endl;
+		archive.put('<').put(tag).put('>');
+		archive.put('\n');
 	}
 
 	string getBinaryTextFromFileWithHuffmanCode(
@@ -107,9 +107,8 @@ private:
 
 		char ch;
 		string encodeText = "";
-		while (!rfile.eof())
+		while (rfile.get(ch))
 		{
-			rfile >> ch;
 			encodeText += huffmanCode[ch];
 		}
 		rfile.close();

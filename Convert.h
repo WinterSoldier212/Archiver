@@ -15,7 +15,6 @@ public:
 	string byteToBinarySequence(char byte)
 	{
 		bitset<8> binarySequence(byte);
-
 		return binarySequence.to_string();
 	}
 

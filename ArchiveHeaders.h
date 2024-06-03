@@ -9,7 +9,7 @@
 #include "FileFunctions.h"
 #include "Convert.h"
 
-ofstream logFile(getCurrentDirectory()+"\\log.txt");
+ofstream logFile(getCurrentDirectory() + "\\log.txt", ios::app);
 
 class ExceptionFileNotExist : public exception
 {
