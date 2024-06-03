@@ -51,7 +51,6 @@ void zip(const po::variables_map& vm)
     archive.Create(pathForNewArchive);
     for (const auto& file : files) 
     {
-        cout << file << endl;
         AddFileInArchive(archive, file);
     }
 }
