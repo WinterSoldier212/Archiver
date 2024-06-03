@@ -2,6 +2,7 @@
 
 #include <map>
 #include "ArchiveHeaders.h"
+#include <iostream>
 
 using namespace std;
 
@@ -18,8 +19,8 @@ public:
 	{
 		Close();
 
-		archiveName = pathForNewArhcive;
-		archive.open(pathForNewArhcive, ios::out);
+		archiveName = getFreeFileNameInDirectory(pathForNewArhcive, ".alzip");
+		archive.open(archiveName, ios::out);
 	}
 
 	virtual void Open(string pathForArhcive) override
@@ -30,8 +31,8 @@ public:
 		}
 		Close();
 
-		archiveName = pathForArhcive;
-		archive.open(pathForArhcive, ios::app);
+		archiveName = getFreeFileNameInDirectory(pathForArhcive, ".alzip");
+		archive.open(archiveName, ios::app);
 	}
 
 	void AddFile(const string& pathForFile)
@@ -46,11 +47,13 @@ public:
 		}
 
 		auto&& byteFrequency = getByteFrequencyFromFile(pathForFile);
-		auto&& huffmanTree = HuffmanTree().getHuffmanTree(byteFrequency);
+		char freeSymbol = getFreeSymbol(byteFrequency);
+
+		auto&& huffmanTree = HuffmanTree().getHuffmanTree(byteFrequency, freeSymbol);
 		auto&& huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
 
 		string&& fileName = getFullFileNameFromPath(pathForFile);
-		string&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree);
+		string&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree, freeSymbol);
 		string&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile);
 		string&& textFromFileModifiedWithHuffmanCode = Convert.binarySequenceToSetBytes(binaryText);
 
@@ -62,15 +65,25 @@ public:
 	}
 
 private:
+	char getFreeSymbol(vector<int>& byteWeights)
+	{
+		for (int i = 1; i < 0x100; ++i)
+		{
+			if (byteWeights.at(i) == 0)
+			{
+				return (char)i;
+			}
+		}
+	}
+
 	vector<int>getByteFrequencyFromFile(const string& pathForFile)
 	{
-		ifstream rfile(pathForFile);
+		ifstream rfile(pathForFile, ios::binary);
 		vector<int> byteFrequency(0x100);
 
 		char ch;
-		while (!rfile.eof())
+		while (rfile.get(ch))
 		{
-			rfile >> ch;
 			++byteFrequency[unsigned char(ch)];
 		}
 		rfile.close();
