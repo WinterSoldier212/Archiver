@@ -2,7 +2,6 @@
 
 #include <regex>
 #include <optional>
-#include <iostream>
 
 #include "ArchiveHeaders.h"
 
@@ -68,7 +67,7 @@ public:
 		{
 			binaryFileText += Convert.byteToBinarySequence(ch);
 		}
-		cout << binaryFileText;
+
 		int zeroBits = fileText[0] - '0';
 		int clearLenghtBinaryFileText = binaryFileText.length() - zeroBits;
 
@@ -79,7 +78,7 @@ public:
 
 			if (reverseHummanCode.count(binarySetForWriteInFile))
 			{
-				wfile << (reverseHummanCode.at(binarySetForWriteInFile));
+				wfile.put(reverseHummanCode.at(binarySetForWriteInFile));
 				binarySetForWriteInFile = "";
 			}
 		}
@@ -96,7 +95,7 @@ private:
 		while (!opt.has_value())
 		{
 			getline(rfile, str);
-			textWithTagFromFile += str;
+			textWithTagFromFile += str + "\n";
 			opt = ejectContentFromTag(textWithTagFromFile, tag);
 		}
 
