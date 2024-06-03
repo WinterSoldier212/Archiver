@@ -22,23 +22,14 @@ struct Node
 class HuffmanTree
 {
 public:
-	Node* getHuffmanTree(vector<int> byteWeights)
+	Node* getHuffmanTree(vector<int> byteWeights, char freeSymbol)
 	{
 		multimap<int, Node*> tree_;
 
-		char symbol, null_symbol = 0;
+		char symbol;
 		int byteWeight;
 
-		for (int i = 31; i < 0x100; ++i)
-		{
-			if (byteWeights.at(i) == 0)
-			{
-				null_symbol = i;
-				break;
-			}
-		}
-
-		for (int i = 0; i < 0x100; ++i)
+		for (int i = 1; i < 0x100; ++i)
 		{
 			if (byteWeights.at(i) != 0)
 			{
@@ -53,7 +44,7 @@ public:
 
 		while (tree_.size() > 1)
 		{
-			tree_.insert(getNewTreeElement(tree_, null_symbol));
+			tree_.insert(getNewTreeElement(tree_, freeSymbol));
 		}
 
 		return tree_.begin()->second;
@@ -76,11 +67,7 @@ public:
 		char zeroSymbol = str[0];
 		vector<Node*> nodes;
 
-		for (unsigned long long i = 0; i < str.size(); ++i)
-		{
-			Node* node = new Node{ str[i] };
-			nodes.push_back(node);
-		}
+		fillTreeNodesWithSymbols(str, nodes);
 
 		Node* cur = nodes[0];
 		auto it = nodes.begin(); it++;
@@ -92,9 +79,15 @@ public:
 			cur->left = left;
 			++it;
 
+			if (it == nodes.end())
+				break;
+
 			Node* right = *it;
 			cur->right = right;
 			++it;
+
+			if (it == nodes.end())
+				break;
 
 			if (left->value == zeroSymbol && right->value == zeroSymbol)
 			{
@@ -116,18 +109,27 @@ public:
 				zeroNodes.pop_back();
 			}
 		}
-
+		
 		return nodes[0];
 	}
 
-	string convertHuffmanTreeToString(Node* tree)
+	string convertHuffmanTreeToString(Node* tree, char freeSymbol)
 	{
-		std::string huffmanTreeInText = "";
+		string huffmanTreeInText = string(1, freeSymbol);
 		translateHuffmanTreeIntoText(tree, tree->value, huffmanTreeInText);
 		return huffmanTreeInText;
 	}
 
 private:
+	void fillTreeNodesWithSymbols(std::string& str, std::vector<Node*>& nodes)
+	{
+		for (unsigned long long i = 0; i < str.size(); ++i)
+		{
+			Node* node = new Node{ str[i] };
+			nodes.push_back(node);
+		}
+	}
+
 	pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree, char null_symbol)
 	{
 		int weight_ = 0;
