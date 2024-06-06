@@ -20,7 +20,7 @@ public:
 		Close();
 
 		archiveName = getFreeFileNameInDirectory(pathForNewArhcive, ".alzip");
-		archive.open(archiveName, ios::out);
+		archive.open(archiveName, ios::out | ios::binary);
 	}
 
 	virtual void Open(string pathForArhcive) override
@@ -32,7 +32,7 @@ public:
 		Close();
 
 		archiveName = getFreeFileNameInDirectory(pathForArhcive, ".alzip");
-		archive.open(archiveName, ios::app);
+		archive.open(archiveName, ios::app | ios::binary);
 	}
 
 	void AddFile(const string& pathForFile)
@@ -46,18 +46,18 @@ public:
 			throw ExceptionArchiveNotOpen(archiveName);
 		}
 
-		auto&& byteFrequency = getByteFrequencyFromFile(pathForFile);
+		vector<size_t>&& byteFrequency = getByteFrequencyFromFile(pathForFile);
 		char freeSymbol = getFreeSymbol(byteFrequency);
 
-		auto&& huffmanTree = HuffmanTree().getHuffmanTree(byteFrequency, freeSymbol);
-		auto&& huffmanCode = HuffmanCode().getHuffmanCode(huffmanTree);
+		auto&& huffmanTree = HuffmanTree::getHuffmanTree(byteFrequency, freeSymbol);
+		auto&& huffmanCode = HuffmanCode::getHuffmanCode(huffmanTree);
 
 		string&& fileName = getFullFileNameFromPath(pathForFile);
-		string&& huffmanTreeInText = HuffmanTree().convertHuffmanTreeToString(huffmanTree, freeSymbol);
+		string&& huffmanTreeInText = HuffmanTree::convertHuffmanTreeToString(huffmanTree, freeSymbol);
 		string&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile);
-		string&& textFromFileModifiedWithHuffmanCode = Convert.binarySequenceToSetBytes(binaryText);
+		string&& textFromFileModifiedWithHuffmanCode = Convert::binarySequenceToSetBytes(binaryText);
 
-		HuffmanTree().deleteHuffmanTree(huffmanTree);
+		HuffmanTree::deleteHuffmanTree(huffmanTree);
 
 		writeTextWithTagToFile(fileName, Tag::FileName);
 		writeTextWithTagToFile(huffmanTreeInText, Tag::HuffmanTree);
@@ -65,9 +65,9 @@ public:
 	}
 
 private:
-	char getFreeSymbol(vector<int>& byteWeights)
+	char getFreeSymbol(vector<size_t>& byteWeights)
 	{
-		for (int i = 1; i < 0x100; ++i)
+		for (int i = 0; i < 0x100; i++)
 		{
 			if (byteWeights.at(i) == 0)
 			{
@@ -76,10 +76,10 @@ private:
 		}
 	}
 
-	vector<int>getByteFrequencyFromFile(const string& pathForFile)
+	vector<size_t> getByteFrequencyFromFile(const string& pathForFile)
 	{
-		ifstream rfile(pathForFile, ios::binary);
-		vector<int> byteFrequency(0x100);
+		ifstream rfile(pathForFile, ios::in | ios::binary);
+		vector<size_t> byteFrequency(0x100);
 
 		char ch;
 		while (rfile.get(ch))
@@ -91,7 +91,7 @@ private:
 		return byteFrequency;
 	}
 
-	void writeTextWithTagToFile(string text, char tag)
+	void writeTextWithTagToFile(string& text, char tag)
 	{
 		archive.put('<').put(tag).put('>');
 		archive << text;
@@ -103,10 +103,10 @@ private:
 		map<unsigned char, string>& huffmanCode,
 		const string& pathForFile
 	) {
-		ifstream rfile(pathForFile, ios::in);
+		ifstream rfile(pathForFile, ios::in | ios::binary);
 
 		char ch;
-		string encodeText = "";
+		string encodeText = string();
 		while (rfile.get(ch))
 		{
 			encodeText += huffmanCode[ch];

@@ -5,20 +5,18 @@ using namespace std;
 
 class Convert {
 public:
-	char binarySequenceToByte(string binarySequence)
+	static char binarySequenceToByte(string binarySequence)
 	{
 		bitset<8> byte(binarySequence);
 
 		return static_cast<char>(byte.to_ulong());
 	}
-
-	string byteToBinarySequence(char byte)
+	static string byteToBinarySequence(char byte)
 	{
 		bitset<8> binarySequence(byte);
 		return binarySequence.to_string();
 	}
-
-	string binarySequenceToSetBytes(const string& binaryFileText)
+	static string binarySequenceToSetBytes(const string& binaryFileText)
 	{
 		char zeroBitCounter = '0';
 		string byteInString = "",
@@ -34,13 +32,23 @@ public:
 			}
 		}
 
-		while (byteInString.size() != 8 && byteInString.size() != 0)
+		while (byteInString.size() != 0 && byteInString.size() != 8)
 		{
 			byteInString += '0';
 			++zeroBitCounter;
-		}
-		binaryTextInByte += binarySequenceToByte(byteInString);
+		} 
+		if (!byteInString.empty())
+			binaryTextInByte += binarySequenceToByte(byteInString);
 
 		return zeroBitCounter + binaryTextInByte;
+	}
+	static string stringToBinarySequence(string& text)
+	{
+		string binarySequence = string();
+		for (char ch : text)
+		{
+			binarySequence += byteToBinarySequence(ch);
+		}
+		return binarySequence;
 	}
 } Convert;

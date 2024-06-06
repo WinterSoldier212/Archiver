@@ -25,80 +25,71 @@ public:
 		Close();
 
 		archiveName = pathForArhcive;
-		archive.open(pathForArhcive, ios::in);
+		archive.open(pathForArhcive, ios::in | ios::binary);
 	}
 
 	void ExtractFile(const string& outputFileDirectory)
 	{
 		if (!IsOpen())
 		{
-			logFile << outputFileDirectory << " Error Open!" << endl;
 			throw ExceptionArchiveNotOpen(archiveName);
 		}
 		if (archive.eof())
 		{
-			logFile << archiveName << " Archive EOF!" << endl;
 			throw ExceptionArchiveEof(archiveName);
 		}
-
+		
 		string&& fileName = getTextInTagFromFile(archive, Tag::FileName);
 		string&& fileHuffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree);
 		string&& fileText = getTextInTagFromFile(archive, Tag::Text);
 
-		auto huffmanTree = HuffmanTree().convertStringToHuffmanTree(fileHuffmanTree);
-		auto reverseHummanCode = HuffmanCode().getReverseHuffmanCode(huffmanTree);
+		string&& binaryFileText = Convert::stringToBinarySequence(fileText);
 
-		if (fileIsExist(outputFileDirectory + "\\" + fileName))
-		{
+		auto huffmanTree = HuffmanTree::convertStringToHuffmanTree(fileHuffmanTree);
+		auto reverseHummanCode = HuffmanCode::getReverseHuffmanCode(huffmanTree);
+
+		if (fileIsExist(outputFileDirectory + "\\" + fileName)) {
 			string clearFileName = getFileNameFromPath(fileName);
 			string clearFileExtension = getFileExtensionFromPath(fileName);
 
 			fileName = getFreeFileNameInDirectory(outputFileDirectory + "\\" + clearFileName, clearFileExtension);
 		}
-		else
-		{
+		else {
 			fileName = outputFileDirectory + "\\" + fileName;
 		}
 
-		ofstream wfile(fileName, ios::binary | ios::out);
+		ofstream wfile(fileName, ios::binary);
 
-		string binaryFileText = "";
-		for (char ch : fileText)
-		{
-			binaryFileText += Convert.byteToBinarySequence(ch);
-		}
-
-		int zeroBits = fileText[0] - '0';
+		int zeroBits = fileText.at(0) - '0';
 		int clearLenghtBinaryFileText = binaryFileText.length() - zeroBits;
 
 		string binarySetForWriteInFile = "";
 		for (int i = 8; i < clearLenghtBinaryFileText; i++)
 		{
-			binarySetForWriteInFile += binaryFileText[i];
-
+			binarySetForWriteInFile += binaryFileText.at(i);
+			
 			if (reverseHummanCode.count(binarySetForWriteInFile))
 			{
 				wfile.put(reverseHummanCode.at(binarySetForWriteInFile));
-				binarySetForWriteInFile = "";
+				binarySetForWriteInFile = string();
 			}
 		}
 		wfile.close();
 	}
 
 private:
-	string getTextInTagFromFile(std::fstream& rfile, char tag)
+	string getTextInTagFromFile(fstream& rfile, char tag)
 	{
 		optional<string> opt;
-		std::string str,
-			textWithTagFromFile = "";
+		string textWithTagFromFile = string();
 
+		string str;
 		while (!opt.has_value())
 		{
 			getline(rfile, str);
-			textWithTagFromFile += str + "\n";
+			textWithTagFromFile += str + '\n';
 			opt = ejectContentFromTag(textWithTagFromFile, tag);
 		}
-
 		return opt.value();
 	}
 
@@ -112,7 +103,7 @@ private:
 
 		if (regex_search(str, result, regular))
 		{
-			return optional<string> {result[2]};
+			return optional<string> {result[0]};
 		}
 		return nullopt;
 	}
@@ -129,12 +120,12 @@ bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDire
 	}
 	catch (ExceptionArchiveNotOpen& ex)
 	{
-		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
+		logFile << " Error Open! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
 		return false;
 	}
 	catch (ExceptionArchiveEof& ex)
 	{
-		logFile << "Error! " << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
+		logFile << "Archive EOF!" << __TIME__ << endl << ex.what() << ex.GetArchiveName() << endl;
 		return false;
 	}
 	catch (exception& ex)

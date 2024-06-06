@@ -84,7 +84,7 @@ public:
 
 namespace Tag
 {
-	const char 
+	const char
 		FileName = 'n',
 		HuffmanTree = 'h',
 		Text = 't';

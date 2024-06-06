@@ -5,6 +5,8 @@
 class HuffmanCode
 {
 public:
+	HuffmanCode() = delete;
+
 	static map<unsigned char, string> getHuffmanCode(Node* root)
 	{
 		map<unsigned char, string> huffmanCode;

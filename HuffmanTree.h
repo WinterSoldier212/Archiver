@@ -22,14 +22,16 @@ struct Node
 class HuffmanTree
 {
 public:
-	Node* getHuffmanTree(vector<int> byteWeights, char freeSymbol)
+	HuffmanTree() = delete;
+
+	static Node* getHuffmanTree(vector<size_t> byteWeights, char freeSymbol)
 	{
 		multimap<int, Node*> tree_;
 
 		char symbol;
 		int byteWeight;
 
-		for (int i = 1; i < 0x100; ++i)
+		for (int i = 0; i < 0x100; ++i)
 		{
 			if (byteWeights.at(i) != 0)
 			{
@@ -50,7 +52,7 @@ public:
 		return tree_.begin()->second;
 	}
 
-	void deleteHuffmanTree(Node* tree)
+	static void deleteHuffmanTree(Node* tree)
 	{
 		if (tree == nullptr)
 			return;
@@ -62,7 +64,7 @@ public:
 		delete tree;
 	}
 
-	Node* convertStringToHuffmanTree(string str)
+	static Node* convertStringToHuffmanTree(string str)
 	{
 		char zeroSymbol = str[0];
 		vector<Node*> nodes;
@@ -113,7 +115,7 @@ public:
 		return nodes[0];
 	}
 
-	string convertHuffmanTreeToString(Node* tree, char freeSymbol)
+	static string convertHuffmanTreeToString(Node* tree, char freeSymbol)
 	{
 		string huffmanTreeInText = string(1, freeSymbol);
 		translateHuffmanTreeIntoText(tree, tree->value, huffmanTreeInText);
@@ -121,16 +123,16 @@ public:
 	}
 
 private:
-	void fillTreeNodesWithSymbols(std::string& str, std::vector<Node*>& nodes)
+	static void fillTreeNodesWithSymbols(std::string& str, std::vector<Node*>& nodes)
 	{
-		for (unsigned long long i = 0; i < str.size(); ++i)
+		for (size_t i = 0; i < str.size(); ++i)
 		{
 			Node* node = new Node{ str[i] };
 			nodes.push_back(node);
 		}
 	}
 
-	pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree, char null_symbol)
+	static pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree, char null_symbol)
 	{
 		int weight_ = 0;
 
@@ -141,7 +143,7 @@ private:
 		return make_pair(weight_, node_);
 	}
 
-	Node* getAndDeleteElement(int& weight_, multimap<int, Node*>& tree)
+	static Node* getAndDeleteElement(int& weight_, multimap<int, Node*>& tree)
 	{
 		weight_ += tree.begin()->first;
 		Node* element = tree.begin()->second;
@@ -150,7 +152,7 @@ private:
 		return element;
 	}
 
-	void translateHuffmanTreeIntoText(Node* root, char ch, string& huffmanTreeInText)
+	static void translateHuffmanTreeIntoText(Node* root, char ch, string& huffmanTreeInText)
 	{
 		if (root == nullptr)
 			return;
