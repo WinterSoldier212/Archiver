@@ -21,6 +21,8 @@ public:
 
 		archiveName = getFreeFileNameInDirectory(pathForNewArhcive, ".alzip");
 		archive.open(archiveName, ios::out | ios::binary);
+		archive << "As the author of this application, which was made as part of the course work, I want to sincerely thank my loved ones and especially Danil! He is a very courageous man who had the strength to tolerate me and listen to my crazy ideas and requests throughout this whole job and my whole life in general! If you hadn't been there, brother, I wouldn't have achieved all this!!! The first line in each of the archives will be dedicated to you, Brother!\n";
+		archive << "I also want to express my gratitude to Ksenia Mikhailovna Spiridonova, a wonderful mathematics teacher who became the head of my course work and gave me the opportunity to freely choose a topic! Thanks! Thanks to everyone who was there for me and supported me!!!";
 	}
 
 	virtual void Open(string pathForArhcive) override
@@ -47,13 +49,12 @@ public:
 		}
 
 		vector<size_t>&& byteFrequency = getByteFrequencyFromFile(pathForFile);
-		char freeSymbol = getFreeSymbol(byteFrequency);
 
-		auto&& huffmanTree = HuffmanTree::getHuffmanTree(byteFrequency, freeSymbol);
+		auto&& huffmanTree = HuffmanTree::getHuffmanTree(byteFrequency);
 		auto&& huffmanCode = HuffmanCode::getHuffmanCode(huffmanTree);
 
 		string&& fileName = getFullFileNameFromPath(pathForFile);
-		string&& huffmanTreeInText = HuffmanTree::convertHuffmanTreeToString(huffmanTree, freeSymbol);
+		string&& huffmanTreeInText = HuffmanTree::convertHuffmanTreeToString(huffmanTree);
 		string&& binaryText = getBinaryTextFromFileWithHuffmanCode(huffmanCode, pathForFile);
 		string&& textFromFileModifiedWithHuffmanCode = Convert::binarySequenceToSetBytes(binaryText);
 
@@ -65,17 +66,6 @@ public:
 	}
 
 private:
-	char getFreeSymbol(vector<size_t>& byteWeights)
-	{
-		for (int i = 0; i < 0x100; i++)
-		{
-			if (byteWeights.at(i) == 0)
-			{
-				return (char)i;
-			}
-		}
-	}
-
 	vector<size_t> getByteFrequencyFromFile(const string& pathForFile)
 	{
 		ifstream rfile(pathForFile, ios::in | ios::binary);
@@ -93,10 +83,9 @@ private:
 
 	void writeTextWithTagToFile(string& text, char tag)
 	{
+		archive.put('\n').put('<').put(tag).put('>').put('\n');
+		archive << text << '\n';
 		archive.put('<').put(tag).put('>');
-		archive << text;
-		archive.put('<').put(tag).put('>');
-		archive.put('\n');
 	}
 
 	string getBinaryTextFromFileWithHuffmanCode(

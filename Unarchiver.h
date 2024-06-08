@@ -38,7 +38,6 @@ public:
 		{
 			throw ExceptionArchiveEof(archiveName);
 		}
-		
 		string&& fileName = getTextInTagFromFile(archive, Tag::FileName);
 		string&& fileHuffmanTree = getTextInTagFromFile(archive, Tag::HuffmanTree);
 		string&& fileText = getTextInTagFromFile(archive, Tag::Text);
@@ -57,14 +56,13 @@ public:
 		else {
 			fileName = outputFileDirectory + "\\" + fileName;
 		}
-
-		ofstream wfile(fileName, ios::binary);
-
+		ofstream wfile(fileName, ios::out | ios::binary);
+		
 		int zeroBits = fileText.at(0) - '0';
-		int clearLenghtBinaryFileText = binaryFileText.length() - zeroBits;
-
+		size_t clearLenghtBinaryFileText = binaryFileText.length() - zeroBits;
+		
 		string binarySetForWriteInFile = "";
-		for (int i = 8; i < clearLenghtBinaryFileText; i++)
+		for (size_t i = 8; i < clearLenghtBinaryFileText; i++)
 		{
 			binarySetForWriteInFile += binaryFileText.at(i);
 			
@@ -75,10 +73,9 @@ public:
 			}
 		}
 		wfile.close();
-	}
-
+	} 
 private:
-	string getTextInTagFromFile(fstream& rfile, char tag)
+	string getTextInTagFromFile(fstream& rfile, const char tag)
 	{
 		optional<string> opt;
 		string textWithTagFromFile = string();
@@ -88,22 +85,27 @@ private:
 		{
 			getline(rfile, str);
 			textWithTagFromFile += str + '\n';
-			opt = ejectContentFromTag(textWithTagFromFile, tag);
+			
+			if (str == ("<" + string(1, tag) + ">"))
+				opt = ejectContentFromTag(textWithTagFromFile, tag);
 		}
 		return opt.value();
 	}
 
-	optional<string> ejectContentFromTag(string str, char tag)
+	optional<string> ejectContentFromTag(string str, const char tag)
 	{
 		smatch result;
 		regex regular(
 			"(<" + string(1, tag) + ">)"
+			"([\n])"
 			"([\\s\\S]*)"
-			"(<" + string(1, tag) + ">)");
+			"([\n])"
+			"(<" + string(1, tag) + ">)"
+		);
 
 		if (regex_search(str, result, regular))
 		{
-			return optional<string> {result[0]};
+			return optional<string> {result[3]};
 		}
 		return nullopt;
 	}
@@ -116,7 +118,7 @@ bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDire
 		logFile << __TIME__ << " Trying to extract file from Archive - " << unarchiver.GetName() << endl;
 		unarchiver.ExtractFile(outputFileDirectory);
 		logFile << __TIME__ << " The file has been successfully extracted!" << endl;
-		return false;
+		return true;
 	}
 	catch (ExceptionArchiveNotOpen& ex)
 	{
@@ -137,5 +139,10 @@ bool ExtractFileFromArchive(Unarchiver& unarchiver, const string& outputFileDire
 
 void ExtractAllFilesFromArchive(Unarchiver& unarchiver, const string& outputFileDirectory)
 {
-	while (ExtractFileFromArchive(unarchiver, outputFileDirectory));
+	bool flag;
+	do
+	{
+		flag = ExtractFileFromArchive(unarchiver, outputFileDirectory);
+	}
+	while (flag);
 }

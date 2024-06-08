@@ -8,14 +8,15 @@ using namespace std;
 
 struct Node
 {
-	char value;
+	char value = '\0';
+	bool isNode = true;
 	Node* left = nullptr, * right = nullptr;
 
-	Node(char x)
-		: value(x)
+	Node(char x, bool isNode_)
+		: value(x), isNode(isNode_)
 	{}
-	Node(char x, Node* left, Node* right)
-		: value(x), left(left), right(right)
+	Node(Node* left, Node* right)
+		: left(left), right(right)
 	{}
 };
 
@@ -24,7 +25,7 @@ class HuffmanTree
 public:
 	HuffmanTree() = delete;
 
-	static Node* getHuffmanTree(vector<size_t> byteWeights, char freeSymbol)
+	static Node* getHuffmanTree(vector<size_t> byteWeights)
 	{
 		multimap<int, Node*> tree_;
 
@@ -37,7 +38,7 @@ public:
 			{
 				symbol = char(i);
 				byteWeight = byteWeights.at(i);
-				Node* node = new Node(symbol);
+				Node* node = new Node(symbol, false);
 
 				auto element = make_pair(byteWeight, node);
 				tree_.insert(element);
@@ -46,7 +47,7 @@ public:
 
 		while (tree_.size() > 1)
 		{
-			tree_.insert(getNewTreeElement(tree_, freeSymbol));
+			tree_.insert(goTwoNodesIntoOne(tree_));
 		}
 
 		return tree_.begin()->second;
@@ -91,20 +92,20 @@ public:
 			if (it == nodes.end())
 				break;
 
-			if (left->value == zeroSymbol && right->value == zeroSymbol)
+			if (left->isNode && right->isNode)
 			{
 				cur = left;
 				zeroNodes.push_back(right);
 			}
-			else if (left->value == zeroSymbol && right->value != zeroSymbol)
+			else if (left->isNode && !right->isNode)
 			{
 				cur = left;
 			}
-			else if (left->value != zeroSymbol && right->value == zeroSymbol)
+			else if (!left->isNode && right->isNode)
 			{
 				cur = right;
 			}
-			else if (left->value != zeroSymbol && right->value != zeroSymbol && !zeroNodes.empty())
+			else if (!left->isNode && !right->isNode && !zeroNodes.empty())
 			{
 				int lastElement = zeroNodes.size() - 1;
 				cur = zeroNodes[lastElement];
@@ -115,30 +116,42 @@ public:
 		return nodes[0];
 	}
 
-	static string convertHuffmanTreeToString(Node* tree, char freeSymbol)
+	static string convertHuffmanTreeToString(Node* tree)
 	{
-		string huffmanTreeInText = string(1, freeSymbol);
-		translateHuffmanTreeIntoText(tree, tree->value, huffmanTreeInText);
+		string huffmanTreeInText = string(1, '\0');
+		translateHuffmanTreeIntoText(tree, huffmanTreeInText);
 		return huffmanTreeInText;
 	}
 
 private:
 	static void fillTreeNodesWithSymbols(std::string& str, std::vector<Node*>& nodes)
 	{
+		Node* node;
 		for (size_t i = 0; i < str.size(); ++i)
 		{
-			Node* node = new Node{ str[i] };
+			if (str[i] == '\\') 
+			{
+				node = new Node(str[++i], false);
+			} 
+			else if (str[i] == '\0')
+			{
+				node = new Node(str[i], true);
+			}
+			else
+			{
+				node = new Node(str[i], false);
+			}
 			nodes.push_back(node);
 		}
 	}
 
-	static pair<int, Node*> getNewTreeElement(multimap<int, Node*>& tree, char null_symbol)
+	static pair<int, Node*> goTwoNodesIntoOne(multimap<int, Node*>& tree)
 	{
 		int weight_ = 0;
 
 		Node* left = getAndDeleteElement(weight_, tree);
 		Node* right = getAndDeleteElement(weight_, tree);
-		Node* node_ = new Node(null_symbol, left, right);
+		Node* node_ = new Node(left, right);
 
 		return make_pair(weight_, node_);
 	}
@@ -152,18 +165,26 @@ private:
 		return element;
 	}
 
-	static void translateHuffmanTreeIntoText(Node* root, char ch, string& huffmanTreeInText)
+	static void translateHuffmanTreeIntoText(Node* root, string& huffmanTreeInText)
 	{
 		if (root == nullptr)
 			return;
 
-		if (root->value == ch)
+		if (root->isNode)
 		{
-			huffmanTreeInText += root->left->value;
-			huffmanTreeInText += root->right->value;
+			Node* left = root->left;
+			Node* right = root->right;
 
-			translateHuffmanTreeIntoText(root->left, ch, huffmanTreeInText);
-			translateHuffmanTreeIntoText(root->right, ch, huffmanTreeInText);
+			if (!left->isNode && (left->value == '\0' || left->value == '\\'))
+				huffmanTreeInText += '\\';
+			huffmanTreeInText += left->value;
+
+			if (!right->isNode && (right->value == '\0' || right->value == '\\'))
+				huffmanTreeInText += '\\';
+			huffmanTreeInText += right->value;
+
+			translateHuffmanTreeIntoText(left, huffmanTreeInText);
+			translateHuffmanTreeIntoText(right, huffmanTreeInText);
 		}
 	}
 };
